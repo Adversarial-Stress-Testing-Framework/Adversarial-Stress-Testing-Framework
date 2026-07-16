@@ -1,0 +1,50 @@
+{
+  "timestamp": "2026-07-17T00:36:24",
+  "epsilon": 0.3,
+  "squeeze_bits": 4,
+  "sections": {
+    "baseline_clean": {
+      "DR (Attack Recall)": 0.9413269657172096,
+      "Normal Recall": 0.9671096592174623,
+      "FPR": 0.03289034078253768,
+      "Accuracy": 0.9551101409009725,
+      "Balanced Accuracy": 0.954218312467336,
+      "prediction_distribution": {
+        "predicted_attack": 0.4556856519150625,
+        "predicted_normal": 0.5443143480849375
+      }
+    },
+    "adversarial_no_defense": {
+      "DR (Attack Recall)": 0.016970834044004776,
+      "Normal Recall": 0.9671096592174623,
+      "FPR": 0.03289034078253768,
+      "Accuracy": 0.5249057352649336,
+      "Balanced Accuracy": 0.49204024663073354,
+      "Evasion Rate": 0.9819713716252945,
+      "Robustness Score": 0.4302044056360389,
+      "MPD": 1.8973665961010273,
+      "Latency (ms/sample)": 4.7549113925486525e-05,
+      "prediction_distribution": {
+        "predicted_attack": 0.025481246279023616,
+        "predicted_normal": 0.9745187537209764
+      }
+    },
+    "adversarial_with_feature_squeezing": {
+      "DR (Attack Recall)": 0.017994200921030188,
+      "Normal Recall": 0.999480288068899,
+      "FPR": 0.0005197119311010468,
+      "Accuracy": 0.5426870410795793,
+      "Balanced Accuracy": 0.5087372444949646,
+      "Evasion Rate": 0.9808842181554629,
+      "Robustness Score": 0.41242309982139314,
+      "MPD": 1.7901584612527217,
+      "Latency (ms/sample)": 5.890454488523093e-05,
+      "prediction_distribution": {
+        "predicted_attack": 0.008652510418733876,
+        "predicted_normal": 0.9913474895812662
+      },
+      "diagnosis": "Feature squeezing does not defend against this static (non-adaptive) FGSM attack. Predictions collapse toward the majority 'normal' class rather than recovering true detection capability; apparent Accuracy/FPR improvement is an artifact of that collapse, not robustness.",
+      "next_step": "Evaluate against an adaptive attacker that accounts for the squeeze function when generating perturbations (e.g. straight-through gradient approximation through the rounding operation). This is out of scope for this 30-40% milestone and targeted for the next milestone."
+    }
+  }
+}
