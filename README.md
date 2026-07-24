@@ -1,29 +1,63 @@
-﻿# Adversarial-Stress-Testing-Framework
+# Adversarial Stress-Testing Framework for ML-Based IDS
 
- What changed / added
+A pipeline for evaluating the robustness of machine learning-based
+intrusion detection systems (IDS) against adversarial evasion attacks,
+and for catching defenses that appear effective under naive metrics
+but provide no real robustness gain.
 
-A complete IDS (intrusion detection) example project was added under the IDS_project directory. Key additions:
-IDS_project/IDS_project/main.py — training pipeline:
-Loads NSL‑KDD training file (KDDTrain+.txt), encodes categorical features, standardizes features, trains a RandomForest (n_estimators=50), evaluates on a held-out test split, runs a simple adversarial test (Gaussian noise), and saves model/scaler as model.pkl and scaler.pkl.
-IDS_project/IDS_project/app.py — Streamlit application:
-Batch prediction tab (upload CSV, preprocess, predict, download results).
-Adversarial robustness tab (add Gaussian noise to scaled features and compare clean vs perturbed predictions).
-Model info tab (algorithm name, number of trees, expected features, classes).
-Pickled artifacts included:
-IDS_project/IDS_project/model.pkl (≈3.56 MB)
-IDS_project/IDS_project/scaler.pkl
-Dataset(s):
-IDS_project/KDDTrain+.txt and IDS_project/IDS_project/KDDTrain+.txt (NSL‑KDD training data present).
-Requirements:
-IDS_project/requirements.txt (pandas, numpy, scikit-learn, joblib with pinned versions).
-Adversarial results:
-IDS_project/stress_test_report.json — a generated report (timestamp 2026-07-17) with quantitative metrics:
-Baseline (clean) Accuracy ≈ 0.9551, Attack Recall ≈ 0.9413, FPR ≈ 0.03289.
-Under adversarial (no defense) Accuracy drops to ≈ 0.5249, Evasion Rate ≈ 0.98197 (i.e., almost all attacks evaded).
-Feature‑squeezing defense shown ineffective against the static FGSM-style perturbation (Robustness Score and metrics remain poor).
-The report includes diagnosis and a “next_step” suggestion to evaluate adaptive attackers.
-Small top-level README.md exists but contains only a title.
-Notable takeaways
+Repo: https://github.com/Adversarial-Stress-Testing-Framework/Adversarial-Stress-Testing-Framework
 
-This commit initializes a minimal but runnable IDS demo: training script + saved model + Streamlit app to run predictions and basic adversarial experiments.
-The included stress test report demonstrates a large drop in detection under simple adversarial perturbations and notes that naive feature-squeezing did not mitigate the evasion — useful baseline for further robustness work.
+## Current status
+
+Phase 1 complete: LinearSVC baseline, FGSM attack, feature-squeezing
+defense evaluation, on NSL-KDD. Extension to additional model families
+(Random Forest, CNN) and attack methods (PGD, DeepFool) is in progress
+— see Roadmap below.
+
+## Results (Phase 1)
+
+| Metric | Baseline | Under FGSM |
+|---|---|---|
+| Detection Rate | 94.1% | 1.7% |
+| Evasion Rate | — | 98.2% |
+
+**Defense evaluation (feature squeezing):**
+
+| Metric | No defense | With defense |
+|---|---|---|
+| Raw accuracy | 52.5% | 54.3% |
+| Balanced accuracy (flagged-attack rate) | 45.6% | 0.9% |
+
+Raw accuracy suggested the defense helped. Balanced accuracy shows
+it didn't — the model mostly stopped predicting "attack" at all.
+This is the core finding of Phase 1: naive accuracy is not a
+sufficient metric for evaluating IDS defenses under adversarial
+conditions.
+
+## Pipeline
+
+1. **Preprocessing** — NSL-KDD cleaning, normalization, feature selection
+2. **Model training** — baseline IDS classifier
+3. **Attack generation** — adversarial sample crafting
+4. **Stress testing** — evaluate model under attack
+5. **Defense evaluation** — apply defense, re-evaluate with balanced metrics
+
+## Setup
+
+\`\`\`bash
+pip install -r requirements.txt
+python run_pipeline.py --model linearsvc --attack fgsm
+\`\`\`
+
+## Roadmap
+
+- [ ] Random Forest + PGD
+- [ ] CNN + DeepFool
+- [ ] Adversarial training as defense
+- [ ] Extend to Transformer-based IDS (longer-term)
+
+## Notes
+
+This is ongoing research supporting an IEEE submission. Findings
+above are reproducible from this repo; extensions are being added
+incrementally rather than held until complete.
