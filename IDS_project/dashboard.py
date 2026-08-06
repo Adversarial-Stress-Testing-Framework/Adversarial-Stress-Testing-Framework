@@ -113,7 +113,7 @@ with st.sidebar:
         st.metric("Attack budget (ε)", full["epsilon"])
         st.metric("Iterative steps", full["steps"])
         st.metric("PGD restarts", full["restarts"])
-        st.write(f"**Surrogate:** {full['surrogate']}")
+        st.caption(full.get("attack_route", ""))
     if sweep:
         st.write(f"**Features audited:** {sweep['n_features']}")
     st.divider()
@@ -150,7 +150,7 @@ with tabs[0]:
                 "Detection rate": e["clean"]["DR"],
                 "False positive rate": e["clean"]["FPR"],
                 "Balanced accuracy": e["clean"]["Balanced Accuracy"],
-                "Attack route": e["attack_route"],
+                "Substitute fit": e.get("substitute_agreement", float("nan")),
             }
             for n, e in full["results"].items()
         ])
@@ -159,13 +159,15 @@ with tabs[0]:
                 "Detection rate": "{:.2%}",
                 "False positive rate": "{:.2%}",
                 "Balanced accuracy": "{:.2%}",
+                "Substitute fit": "{:.2%}",
             }),
             width="stretch", hide_index=True,
         )
 
         st.caption(
-            "Tree models expose no input gradient, so they are attacked by "
-            "transfer from a surrogate rather than directly."
+            "Every victim is attacked through its own substitute - a model fitted "
+            "to its outputs - so all four face an identical attack. Substitute fit "
+            "is how often that stand-in agrees with the real model."
         )
 
         st.divider()
@@ -195,7 +197,7 @@ with tabs[1]:
                     rows.append({
                         "Model": model, "Attack": atk,
                         "Evaluation": regime.capitalize(),
-                        "Evasion rate": r[regime]["no_defense"],
+                        "Evasion rate": r["black_box"][regime]["no_defense"],
                     })
         df = pd.DataFrame(rows)
         st.altair_chart(
@@ -214,8 +216,8 @@ with tabs[1]:
         over = []
         for model, e in full["results"].items():
             for atk, r in e["attacks"].items():
-                c = r["constrained"]["no_defense"]
-                u = r["unconstrained"]["no_defense"]
+                c = r["black_box"]["constrained"]["no_defense"]
+                u = r["black_box"]["unconstrained"]["no_defense"]
                 over.append({
                     "Model": model, "Attack": atk,
                     "Overstatement": (u / c) if c > 0 else None,
@@ -246,10 +248,10 @@ with tabs[2]:
                              "Condition": "1 · Clean", "Detection rate": e["clean"]["DR"]})
                 rows.append({"Model": model, "Attack": atk,
                              "Condition": "2 · Unconstrained attack",
-                             "Detection rate": r["unconstrained"]["DR_after_attack"]})
+                             "Detection rate": r["black_box"]["unconstrained"]["DR_after_attack"]})
                 rows.append({"Model": model, "Attack": atk,
                              "Condition": "3 · Constrained attack",
-                             "Detection rate": r["constrained"]["DR_after_attack"]})
+                             "Detection rate": r["black_box"]["constrained"]["DR_after_attack"]})
         df = pd.DataFrame(rows)
         st.altair_chart(
             bar(df, "Attack", "Detection rate", "Condition",
@@ -267,8 +269,8 @@ with tabs[2]:
         st.subheader("Ranking inversion")
         worst = []
         for model, e in full["results"].items():
-            drs_u = [r["unconstrained"]["DR_after_attack"] for r in e["attacks"].values()]
-            drs_c = [r["constrained"]["DR_after_attack"] for r in e["attacks"].values()]
+            drs_u = [r["black_box"]["unconstrained"]["DR_after_attack"] for r in e["attacks"].values()]
+            drs_c = [r["black_box"]["constrained"]["DR_after_attack"] for r in e["attacks"].values()]
             worst.append({
                 "Model": model,
                 "Clean": e["clean"]["DR"],
@@ -338,7 +340,7 @@ with tabs[4]:
         st.subheader("Defenses against the strongest realistic attack")
         rows = []
         for model, e in full["results"].items():
-            c = e["attacks"]["PGD"]["constrained"]
+            c = e["attacks"]["PGD"]["black_box"]["constrained"]
             hardened = evasion_after_hardening(full["adversarial_training"][model])
             for label, val in (
                 ("No defense", c["no_defense"]),
@@ -367,9 +369,9 @@ with tabs[4]:
         for model, e in full["results"].items():
             for atk, r in e["attacks"].items():
                 rows.append({"Model": model, "Attack": atk, "Defense": "None",
-                             "Evasion rate": r["unconstrained"]["no_defense"]})
+                             "Evasion rate": r["black_box"]["unconstrained"]["no_defense"]})
                 rows.append({"Model": model, "Attack": atk, "Defense": "Filter",
-                             "Evasion rate": r["unconstrained"]["realizability_filter"]})
+                             "Evasion rate": r["black_box"]["unconstrained"]["realizability_filter"]})
         st.altair_chart(
             bar(pd.DataFrame(rows), "Attack", "Evasion rate", "Defense",
                 "Impossible traffic is rejected outright", "Attack success",
