@@ -61,7 +61,9 @@ st.caption("RandomForest classifier trained on the NSL-KDD dataset")
 model, scaler = load_model_and_scaler()
 encoders, feature_cols, cat_cols = fit_encoders()
 
-tab1, tab2, tab3 = st.tabs(["📁 Batch Prediction", "⚔️ Adversarial Robustness", "ℹ️ Model Info"])
+tab1, tab2, tab3 = st.tabs(
+    ["📁 Batch Prediction", "🌫️ Random Noise Sensitivity", "ℹ️ Model Info"]
+)
 
 # -------------------------
 # TAB 1: BATCH PREDICTION
@@ -103,7 +105,16 @@ with tab1:
 # TAB 2: ADVERSARIAL ROBUSTNESS
 # -------------------------
 with tab2:
-    st.subheader("Compare predictions on clean vs. noise-perturbed data")
+    st.subheader("Compare predictions on clean vs. randomly perturbed data")
+    st.warning(
+        "**This is not an adversarial attack.** It adds random Gaussian noise, which "
+        "moves samples in no particular direction and is a weak baseline. A real "
+        "adversarial attack computes the specific direction that fools the model, and "
+        "is far more effective. The genuine attacks (FGSM / BIM / PGD, with and without "
+        "domain constraints) live in `stress_test/` — run "
+        "`python -m stress_test.run_full_matrix` for the real numbers.",
+        icon="⚠️",
+    )
     uploaded_adv = st.file_uploader("Choose a CSV file", type=["csv", "txt"], key="adv")
     noise_std = st.slider("Gaussian noise std-dev", 0.0, 2.0, 0.5, 0.1)
 
