@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-07-17T00:36:24",
+  "timestamp": "2026-08-03T19:12:17",
   "epsilon": 0.3,
   "squeeze_bits": 4,
   "sections": {
@@ -23,7 +23,7 @@
       "Evasion Rate": 0.9819713716252945,
       "Robustness Score": 0.4302044056360389,
       "MPD": 1.8973665961010273,
-      "Latency (ms/sample)": 4.7549113925486525e-05,
+      "Latency (ms/sample)": 0.00022272673147890124,
       "prediction_distribution": {
         "predicted_attack": 0.025481246279023616,
         "predicted_normal": 0.9745187537209764
@@ -38,7 +38,7 @@
       "Evasion Rate": 0.9808842181554629,
       "Robustness Score": 0.41242309982139314,
       "MPD": 1.7901584612527217,
-      "Latency (ms/sample)": 5.890454488523093e-05,
+      "Latency (ms/sample)": 0.00010096050805269365,
       "prediction_distribution": {
         "predicted_attack": 0.008652510418733876,
         "predicted_normal": 0.9913474895812662

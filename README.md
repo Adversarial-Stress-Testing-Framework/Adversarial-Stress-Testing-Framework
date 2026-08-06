@@ -1,63 +1,148 @@
-# Adversarial Stress-Testing Framework for ML-Based IDS
+# Adversarial Stress-Testing Framework for ML-Based Intrusion Detection
 
-A pipeline for evaluating the robustness of machine learning-based
-intrusion detection systems (IDS) against adversarial evasion attacks,
-and for catching defenses that appear effective under naive metrics
-but provide no real robustness gain.
+Adversarial attacks on network intrusion detection are usually evaluated in
+**feature space**, where the attacker may set any feature to any value. That
+produces "attack traffic" containing negative byte counts, fractional protocol
+identifiers, and connections that retroactively last longer than they did.
 
-Repo: https://github.com/Adversarial-Stress-Testing-Framework/Adversarial-Stress-Testing-Framework
+No such traffic can be sent. This framework re-measures IDS robustness under
+**domain constraints** - restricting the attacker to changes a real network flow
+could actually contain - and reports the difference.
 
-## Current status
+On NSL-KDD, reported vulnerability drops by up to **19.7x**.
 
-Phase 1 complete: LinearSVC baseline, FGSM attack, feature-squeezing
-defense evaluation, on NSL-KDD. Extension to additional model families
-(Random Forest, CNN) and attack methods (PGD, DeepFool) is in progress
-— see Roadmap below.
+---
 
-## Results (Phase 1)
+## Findings
 
-| Metric | Baseline | Under FGSM |
+Every victim is attacked through its **own substitute model** - the adversary
+queries it and fits a differentiable stand-in to its outputs - so all four face
+an identical attack and stay directly comparable. Substitutes agree with their
+victims on 99.4-99.9% of test flows.
+
+Attack success under PGD, black-box:
+
+| Model | Unconstrained | Constrained | Overstated by |
+|---|---|---|---|
+| LinearSVC | 98.2% | 5.0% | **19.7x** |
+| MLP | 91.6% | 4.9% | **18.7x** |
+| RandomForest | 78.6% | 36.5% | 2.2x |
+| XGBoost | 73.1% | 31.5% | 2.3x |
+
+The unconstrained attack produced impossible values in **23 of 40 features** -
+negative byte counts, protocol identifier `1.128`, a 0-second connection
+becoming 784 seconds. The constrained attack produces none.
+
+### The protocol reorders the models
+
+Detection rate under realistic attack (constrained, black-box PGD):
+
+| Model | Clean | Under attack | Points lost |
+|---|---|---|---|
+| RandomForest | 99.80% | 63.41% | **-36.4** |
+| XGBoost | 99.93% | 68.47% | **-31.5** |
+| MLP | 99.47% | 94.60% | -4.9 |
+| LinearSVC | 94.13% | 89.45% | -4.7 |
+
+The two models that look strongest on clean data degrade **seven times harder**
+than the two that look weakest. Selecting an IDS on clean accuracy, or on
+unconstrained adversarial benchmarks, picks the more fragile option.
+
+### Adversarial training holds under an adaptive attacker
+
+Retrained on *constrained* adversarial examples, then re-attacked with a
+substitute rebuilt against the hardened model:
+
+| Model | Undefended | Stale substitute | Adaptive |
+|---|---|---|---|
+| LinearSVC | 5.0% | 0.7% | **2.9%** |
+| RandomForest | 36.5% | 0.0% | **0.0%** |
+| XGBoost | 31.5% | 0.1% | **0.2%** |
+| MLP | 4.9% | 0.1% | **0.5%** |
+
+The adaptive attacker recovers ground over the stale one, as it should, but the
+defense still holds - at negligible cost to clean detection.
+
+## What's in here
+
+```
+IDS_project/stress_test/
+  constraints.py                 feature taxonomy + projection onto realizable flows
+  attacks.py                     FGSM, BIM, PGD, minimal-epsilon search, gradients
+  victims.py                     LinearSVC, RandomForest, XGBoost, MLP, substitutes
+  defense.py                     feature squeezing, realizability filter, adv. training
+  metrics.py                     DR, FPR, evasion rate, robustness score, MPD
+  run_full_matrix.py             4 models x 3 attacks x 3 defenses, both routes
+  run_constrained_comparison.py  attack-budget sweep
+  run_multiseed.py               headline metrics over several seeds
+IDS_project/dashboard.py         six-tab audit dashboard
+EXPERT_QNA_PREP.md               glossary, threat model, known limitations
+```
+
+Tree models expose no usable input gradient. Rather than attacking them by
+transfer while attacking the differentiable models directly - which confounds
+model robustness with attack strength - every victim is routed through its own
+substitute. White-box results are reported separately where available.
+
+## Running it
+
+```bash
+pip install -r IDS_project/requirements.txt
+cd IDS_project
+python -m stress_test.run_full_matrix
+python -m stress_test.run_constrained_comparison
+streamlit run dashboard.py
+```
+
+Both runners must be re-run after any change to `constraints.py`, or the
+dashboard will show figures from two different versions of the constraint set.
+
+`IDS_project/IDS_project/` holds the earlier RandomForest + Streamlit demo. Run
+`python main.py` there first to regenerate `model.pkl` / `scaler.pkl`.
+
+## Constraint model
+
+Each of the 40 surviving NSL-KDD features is classified by what an attacker can
+genuinely do to it:
+
+| Role | Count | Rationale |
 |---|---|---|
-| Detection Rate | 94.1% | 1.7% |
-| Evasion Rate | — | 98.2% |
+| **Immutable** | 15 | Protocol, service, connection outcome flags. Changing them changes the attack itself, or they are victim-controlled |
+| **Increase-only** | 10 | Bytes, duration, connection counts. An attacker can pad and stall; they cannot un-send data |
+| **Derived rate** | 15 | Window ratios, bounded and jointly constrained |
 
-**Defense evaluation (feature squeezing):**
+Bounds are **learned from training data, not asserted**. An earlier version
+hardcoded `same_srv_rate + diff_srv_rate <= 1` on the grounds that it must
+logically hold - 3,574 genuine NSL-KDD flows violate it, reaching 1.5, because
+the KDD extractor computes the two rates over different windows. That rule
+rejected 5.2% of legitimate traffic and tripled the false-positive rate.
 
-| Metric | No defense | With defense |
-|---|---|---|
-| Raw accuracy | 52.5% | 54.3% |
-| Balanced accuracy (flagged-attack rate) | 45.6% | 0.9% |
+## Limitations
 
-Raw accuracy suggested the defense helped. Balanced accuracy shows
-it didn't — the model mostly stopped predicting "attack" at all.
-This is the core finding of Phase 1: naive accuracy is not a
-sufficient metric for evaluating IDS defenses under adversarial
-conditions.
+- **Feature space with problem-space constraints**, not true problem space. No
+  packets are generated, and we do not verify a perturbed flow still executes
+  the original attack.
+- **NSL-KDD only.** 2009 data derived from a 1999 capture. The overstatement
+  factor is dataset-specific; the phenomenon should not be.
+- **80/20 split of KDDTrain+**, not the standard KDDTest+ protocol, which
+  deliberately contains attack types absent from training. Clean accuracy is
+  therefore optimistic.
+- **Single seed** (`random_state=42`) in the main runners. `run_multiseed.py`
+  exists to produce mean +/- std but has not yet been executed.
+- The constraint taxonomy is a judgement call. If an attacker can manipulate a
+  feature marked immutable, the constrained figures are optimistic.
 
-## Pipeline
+## Related work
 
-1. **Preprocessing** — NSL-KDD cleaning, normalization, feature selection
-2. **Model training** — baseline IDS classifier
-3. **Attack generation** — adversarial sample crafting
-4. **Stress testing** — evaluate model under attack
-5. **Defense evaluation** — apply defense, re-evaluate with balanced metrics
+Constrained adversarial attacks on network IDS are an established line of work.
+See Pierazzi et al. (IEEE S&P 2020) on problem-space attacks, Sheatsley et al.
+on domain constraints, Chernikova & Oprea (FENCE), and Apruzzese et al. on
+realistic attacks against NIDS. The contribution here is the measurement
+comparison, the like-for-like robustness ranking, and the packaging as a
+reusable audit - not the idea of constraining attacks.
 
-## Setup
+## Authors
 
-\`\`\`bash
-pip install -r requirements.txt
-python run_pipeline.py --model linearsvc --attack fgsm
-\`\`\`
-
-## Roadmap
-
-- [ ] Random Forest + PGD
-- [ ] CNN + DeepFool
-- [ ] Adversarial training as defense
-- [ ] Extend to Transformer-based IDS (longer-term)
-
-## Notes
-
-This is ongoing research supporting an IEEE submission. Findings
-above are reproducible from this repo; extensions are being added
-incrementally rather than held until complete.
+Jeet Jain, Ishan Dubey, Jeet Vasani
+Guided by Dr. Vivek Bhartiya and Abhijeet Jadhav
+Thakur College of Engineering and Technology, Mumbai
