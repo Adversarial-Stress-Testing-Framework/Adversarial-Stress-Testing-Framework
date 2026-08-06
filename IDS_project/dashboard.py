@@ -134,6 +134,12 @@ with tabs[0]:
 
     if sweep:
         h = sweep["headline"]
+        st.caption(
+            "LinearSVC, **white-box** (the attacker differentiates the victim "
+            "directly). The Attacks tab reports the black-box route, where every "
+            "model is attacked through its own substitute — those figures differ "
+            "slightly by design, not by error."
+        )
         c1, c2, c3, c4 = st.columns(4)
         c1.metric("Attack wins — unconstrained", pct(h["unconstrained_evasion_rate"]))
         c2.metric("Attack wins — constrained", pct(h["constrained_evasion_rate"]))
