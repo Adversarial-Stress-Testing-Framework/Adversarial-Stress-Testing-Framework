@@ -94,6 +94,31 @@ VICTIMS = {
 }
 
 
+def train_substitute(X_train, victim, seed=RANDOM_STATE):
+    """Train a differentiable stand-in for `victim` from its outputs alone.
+
+    The substitute-model attack (Papernot et al., 2017): the adversary cannot
+    read the victim's parameters, but can query it, so they label a dataset with
+    the victim's own predictions and fit a model they *can* differentiate.
+
+    This exists to remove a confound. Attacking LinearSVC and the MLP directly
+    while reaching the trees only by transfer compares a white-box attack
+    against a black-box one, so any robustness ranking that comes out is partly
+    an artefact of which model got the stronger attack. Routing every victim
+    through its own substitute puts them all on identical footing.
+    """
+    model = MLPClassifier(
+        hidden_layer_sizes=(64, 32),
+        activation="relu",
+        max_iter=60,
+        early_stopping=True,
+        n_iter_no_change=5,
+        random_state=seed,
+    )
+    model.fit(X_train, victim.predict(X_train))
+    return model
+
+
 def train_all(X_train, y_train, verbose=True):
     """Train every victim; returns {name: (model, gradient_fn_or_None)}."""
     trained = {}

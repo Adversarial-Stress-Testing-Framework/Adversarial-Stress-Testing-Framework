@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-08-03T20:51:05",
+  "timestamp": "2026-08-06T14:54:18",
   "epsilon": 0.3,
   "steps": 20,
   "restarts": 2,
   "squeeze_bits": 4,
-  "surrogate": "MLP",
+  "attack_route": "per-victim substitute model (uniform black-box) + white-box where differentiable",
   "results": {
     "LinearSVC": {
       "clean": {
@@ -12,55 +12,110 @@
         "FPR": 0.03289034078253768,
         "Balanced Accuracy": 0.954218312467336
       },
-      "attack_route": "direct",
       "n_attackable": 11038,
+      "substitute_agreement": 0.9977773367731693,
+      "white_box_available": true,
       "attacks": {
         "FGSM": {
-          "unconstrained": {
-            "no_defense": 0.9819713716252945,
-            "feature_squeezing": 0.9808842181554629,
-            "realizability_filter": 0.0,
-            "DR_after_attack": 0.016970834044004776,
-            "BalAcc_after_attack": 0.49204024663073354
+          "black_box": {
+            "unconstrained": {
+              "no_defense": 0.9819713716252945,
+              "feature_squeezing": 0.980793622032977,
+              "realizability_filter": 0.0,
+              "DR_after_attack": 0.016970834044004776,
+              "BalAcc_after_attack": 0.49204024663073354
+            },
+            "constrained": {
+              "no_defense": 0.049646675122304765,
+              "feature_squeezing": 0.049012502264903064,
+              "realizability_filter": 0.049646675122304765,
+              "DR_after_attack": 0.8945932116663824,
+              "BalAcc_after_attack": 0.9308514354419224
+            }
           },
-          "constrained": {
-            "no_defense": 0.05263634716434137,
-            "feature_squeezing": 0.0519115781844537,
-            "realizability_filter": 0.05263634716434137,
-            "DR_after_attack": 0.8917789527545625,
-            "BalAcc_after_attack": 0.9294443059860125
+          "white_box": {
+            "unconstrained": {
+              "no_defense": 0.9819713716252945,
+              "feature_squeezing": 0.9808842181554629,
+              "realizability_filter": 0.0,
+              "DR_after_attack": 0.016970834044004776,
+              "BalAcc_after_attack": 0.49204024663073354
+            },
+            "constrained": {
+              "no_defense": 0.05263634716434137,
+              "feature_squeezing": 0.0519115781844537,
+              "realizability_filter": 0.05263634716434137,
+              "DR_after_attack": 0.8917789527545625,
+              "BalAcc_after_attack": 0.9294443059860125
+            }
           }
         },
         "BIM": {
-          "unconstrained": {
-            "no_defense": 0.9819713716252945,
-            "feature_squeezing": 0.9710998369269795,
-            "realizability_filter": 0.0,
-            "DR_after_attack": 0.016970834044004776,
-            "BalAcc_after_attack": 0.49204024663073354
+          "black_box": {
+            "unconstrained": {
+              "no_defense": 0.9819713716252945,
+              "feature_squeezing": 0.9710998369269795,
+              "realizability_filter": 0.0,
+              "DR_after_attack": 0.016970834044004776,
+              "BalAcc_after_attack": 0.49204024663073354
+            },
+            "constrained": {
+              "no_defense": 0.04973727124479072,
+              "feature_squeezing": 0.027450625113245152,
+              "realizability_filter": 0.04973727124479072,
+              "DR_after_attack": 0.894507931093297,
+              "BalAcc_after_attack": 0.9308087951553796
+            }
           },
-          "constrained": {
-            "no_defense": 0.05263634716434137,
-            "feature_squeezing": 0.02908135531799239,
-            "realizability_filter": 0.05263634716434137,
-            "DR_after_attack": 0.8917789527545625,
-            "BalAcc_after_attack": 0.9294443059860125
+          "white_box": {
+            "unconstrained": {
+              "no_defense": 0.9819713716252945,
+              "feature_squeezing": 0.9710998369269795,
+              "realizability_filter": 0.0,
+              "DR_after_attack": 0.016970834044004776,
+              "BalAcc_after_attack": 0.49204024663073354
+            },
+            "constrained": {
+              "no_defense": 0.05263634716434137,
+              "feature_squeezing": 0.02908135531799239,
+              "realizability_filter": 0.05263634716434137,
+              "DR_after_attack": 0.8917789527545625,
+              "BalAcc_after_attack": 0.9294443059860125
+            }
           }
         },
         "PGD": {
-          "unconstrained": {
-            "no_defense": 0.9819713716252945,
-            "feature_squeezing": 0.1369813371987679,
-            "realizability_filter": 0.0,
-            "DR_after_attack": 0.016970834044004776,
-            "BalAcc_after_attack": 0.49204024663073354
+          "black_box": {
+            "unconstrained": {
+              "no_defense": 0.9819713716252945,
+              "feature_squeezing": 0.1329045116868998,
+              "realizability_filter": 0.0,
+              "DR_after_attack": 0.016970834044004776,
+              "BalAcc_after_attack": 0.49204024663073354
+            },
+            "constrained": {
+              "no_defense": 0.04973727124479072,
+              "feature_squeezing": 0.03170864287008516,
+              "realizability_filter": 0.04973727124479072,
+              "DR_after_attack": 0.894507931093297,
+              "BalAcc_after_attack": 0.9308087951553796
+            }
           },
-          "constrained": {
-            "no_defense": 0.05263634716434137,
-            "feature_squeezing": 0.033339373074832396,
-            "realizability_filter": 0.05263634716434137,
-            "DR_after_attack": 0.8917789527545625,
-            "BalAcc_after_attack": 0.9294443059860125
+          "white_box": {
+            "unconstrained": {
+              "no_defense": 0.9819713716252945,
+              "feature_squeezing": 0.1369813371987679,
+              "realizability_filter": 0.0,
+              "DR_after_attack": 0.016970834044004776,
+              "BalAcc_after_attack": 0.49204024663073354
+            },
+            "constrained": {
+              "no_defense": 0.05263634716434137,
+              "feature_squeezing": 0.033339373074832396,
+              "realizability_filter": 0.05263634716434137,
+              "DR_after_attack": 0.8917789527545625,
+              "BalAcc_after_attack": 0.9294443059860125
+            }
           }
         }
       }
@@ -71,56 +126,66 @@
         "FPR": 0.000445467369515183,
         "Balanced Accuracy": 0.9987965397247597
       },
-      "attack_route": "transfer from MLP",
       "n_attackable": 11703,
+      "substitute_agreement": 0.9946021035919825,
+      "white_box_available": false,
       "attacks": {
         "FGSM": {
-          "unconstrained": {
-            "no_defense": 0.37571562847133216,
-            "feature_squeezing": 0.2985559258309835,
-            "realizability_filter": 0.0,
-            "DR_after_attack": 0.623059866962306,
-            "BalAcc_after_attack": 0.8113071997963954
+          "black_box": {
+            "unconstrained": {
+              "no_defense": 0.2504486029223276,
+              "feature_squeezing": 0.10245236264205759,
+              "realizability_filter": 0.0,
+              "DR_after_attack": 0.7480811871055774,
+              "BalAcc_after_attack": 0.8738178598680311
+            },
+            "constrained": {
+              "no_defense": 0.09578740493890456,
+              "feature_squeezing": 0.05357600615226865,
+              "realizability_filter": 0.09578740493890456,
+              "DR_after_attack": 0.9024390243902439,
+              "BalAcc_after_attack": 0.9509967785103643
+            }
           },
-          "constrained": {
-            "no_defense": 0.039306160813466634,
-            "feature_squeezing": 0.04443305135435358,
-            "realizability_filter": 0.039306160813466634,
-            "DR_after_attack": 0.9588094831997271,
-            "BalAcc_after_attack": 0.9791820079151059
-          }
+          "white_box": null
         },
         "BIM": {
-          "unconstrained": {
-            "no_defense": 0.48372212253268393,
-            "feature_squeezing": 0.22378877210971546,
-            "realizability_filter": 0.0,
-            "DR_after_attack": 0.5152652225822958,
-            "BalAcc_after_attack": 0.7574098776063902
+          "black_box": {
+            "unconstrained": {
+              "no_defense": 0.31427839015637016,
+              "feature_squeezing": 0.11518414081859352,
+              "realizability_filter": 0.0,
+              "DR_after_attack": 0.6843765990107453,
+              "BalAcc_after_attack": 0.8419655658206151
+            },
+            "constrained": {
+              "no_defense": 0.10040160642570281,
+              "feature_squeezing": 0.05126890540886952,
+              "realizability_filter": 0.10040160642570281,
+              "DR_after_attack": 0.8978338734436295,
+              "BalAcc_after_attack": 0.9486942030370571
+            }
           },
-          "constrained": {
-            "no_defense": 0.05135435358455097,
-            "feature_squeezing": 0.041271468854139966,
-            "realizability_filter": 0.05135435358455097,
-            "DR_after_attack": 0.9467849223946785,
-            "BalAcc_after_attack": 0.9731697275125817
-          }
+          "white_box": null
         },
         "PGD": {
-          "unconstrained": {
-            "no_defense": 0.7653593095787405,
-            "feature_squeezing": 0.08100487054601384,
-            "realizability_filter": 0.0,
-            "DR_after_attack": 0.2341804536926488,
-            "BalAcc_after_attack": 0.6168674931615667
+          "black_box": {
+            "unconstrained": {
+              "no_defense": 0.7856959753909254,
+              "feature_squeezing": 0.08485003845167906,
+              "realizability_filter": 0.0,
+              "DR_after_attack": 0.21388367729831145,
+              "BalAcc_after_attack": 0.6067191049643981
+            },
+            "constrained": {
+              "no_defense": 0.36469281380842516,
+              "feature_squeezing": 0.05135435358455097,
+              "realizability_filter": 0.36469281380842516,
+              "DR_after_attack": 0.6340610608903292,
+              "BalAcc_after_attack": 0.816807796760407
+            }
           },
-          "constrained": {
-            "no_defense": 0.2995813039391609,
-            "feature_squeezing": 0.040929676151414164,
-            "realizability_filter": 0.2995813039391609,
-            "DR_after_attack": 0.699044857581443,
-            "BalAcc_after_attack": 0.8492996951059639
-          }
+          "white_box": null
         }
       }
     },
@@ -130,56 +195,66 @@
         "FPR": 0.000890934739030366,
         "Balanced Accuracy": 0.999213410338143
       },
-      "attack_route": "transfer from MLP",
       "n_attackable": 11718,
+      "substitute_agreement": 0.994244889859099,
+      "white_box_available": false,
       "attacks": {
         "FGSM": {
-          "unconstrained": {
-            "no_defense": 0.06400409626216078,
-            "feature_squeezing": 0.09404335210786824,
-            "realizability_filter": 0.0,
-            "DR_after_attack": 0.9353573256012281,
-            "BalAcc_after_attack": 0.9672331954310989
+          "black_box": {
+            "unconstrained": {
+              "no_defense": 0.40066564260112647,
+              "feature_squeezing": 0.16845878136200718,
+              "realizability_filter": 0.0,
+              "DR_after_attack": 0.5989254647791233,
+              "BalAcc_after_attack": 0.7990172650200464
+            },
+            "constrained": {
+              "no_defense": 0.14584400068271036,
+              "feature_squeezing": 0.056664959890766343,
+              "realizability_filter": 0.14584400068271036,
+              "DR_after_attack": 0.8535732560122804,
+              "BalAcc_after_attack": 0.926341160636625
+            }
           },
-          "constrained": {
-            "no_defense": 0.03046594982078853,
-            "feature_squeezing": 0.06016385048643113,
-            "realizability_filter": 0.03046594982078853,
-            "DR_after_attack": 0.9688725908238104,
-            "BalAcc_after_attack": 0.98399082804239
-          }
+          "white_box": null
         },
         "BIM": {
-          "unconstrained": {
-            "no_defense": 0.0985663082437276,
-            "feature_squeezing": 0.06246799795186892,
-            "realizability_filter": 0.0,
-            "DR_after_attack": 0.9008186935016204,
-            "BalAcc_after_attack": 0.949963879381295
+          "black_box": {
+            "unconstrained": {
+              "no_defense": 0.4650964328383683,
+              "feature_squeezing": 0.027905785970302098,
+              "realizability_filter": 0.0,
+              "DR_after_attack": 0.5345386320996077,
+              "BalAcc_after_attack": 0.7668238486802887
+            },
+            "constrained": {
+              "no_defense": 0.19610855094726062,
+              "feature_squeezing": 0.04881379074927462,
+              "realizability_filter": 0.19610855094726062,
+              "DR_after_attack": 0.8033429984649497,
+              "BalAcc_after_attack": 0.9012260318629597
+            }
           },
-          "constrained": {
-            "no_defense": 0.035756955111793824,
-            "feature_squeezing": 0.05470216760539341,
-            "realizability_filter": 0.035756955111793824,
-            "DR_after_attack": 0.9635851952925124,
-            "BalAcc_after_attack": 0.981347130276741
-          }
+          "white_box": null
         },
         "PGD": {
-          "unconstrained": {
-            "no_defense": 0.505973715651135,
-            "feature_squeezing": 0.06101723843659328,
-            "realizability_filter": 0.0,
-            "DR_after_attack": 0.4936892375916766,
-            "BalAcc_after_attack": 0.7463991514263231
+          "black_box": {
+            "unconstrained": {
+              "no_defense": 0.7308414405188599,
+              "feature_squeezing": 0.05726233145587984,
+              "realizability_filter": 0.0,
+              "DR_after_attack": 0.26897492751151286,
+              "BalAcc_after_attack": 0.6340419963862413
+            },
+            "constrained": {
+              "no_defense": 0.3148148148148148,
+              "feature_squeezing": 0.04702167605393412,
+              "realizability_filter": 0.3148148148148148,
+              "DR_after_attack": 0.6847177213030872,
+              "BalAcc_after_attack": 0.8419133932820284
+            }
           },
-          "constrained": {
-            "no_defense": 0.20378904249871993,
-            "feature_squeezing": 0.04787506400409626,
-            "realizability_filter": 0.20378904249871993,
-            "DR_after_attack": 0.795667746887259,
-            "BalAcc_after_attack": 0.8973884060741144
-          }
+          "white_box": null
         }
       }
     },
@@ -189,55 +264,110 @@
         "FPR": 0.004825896503081149,
         "Balanced Accuracy": 0.9949433539828104
       },
-      "attack_route": "direct",
       "n_attackable": 11664,
+      "substitute_agreement": 0.9987299067275253,
+      "white_box_available": true,
       "attacks": {
         "FGSM": {
-          "unconstrained": {
-            "no_defense": 0.8864026063100137,
-            "feature_squeezing": 0.8744855967078189,
-            "realizability_filter": 0.0,
-            "DR_after_attack": 0.11299675933822276,
-            "BalAcc_after_attack": 0.5540854314175708
+          "black_box": {
+            "unconstrained": {
+              "no_defense": 0.8929183813443072,
+              "feature_squeezing": 0.8691700960219478,
+              "realizability_filter": 0.0,
+              "DR_after_attack": 0.10651543578372846,
+              "BalAcc_after_attack": 0.5508447696403236
+            },
+            "constrained": {
+              "no_defense": 0.04543895747599451,
+              "feature_squeezing": 0.04046639231824417,
+              "realizability_filter": 0.04543895747599451,
+              "DR_after_attack": 0.9495139007334129,
+              "BalAcc_after_attack": 0.9723440021151659
+            }
           },
-          "constrained": {
-            "no_defense": 0.04861111111111111,
-            "feature_squeezing": 0.04449588477366255,
-            "realizability_filter": 0.04861111111111111,
-            "DR_after_attack": 0.9463585195292512,
-            "BalAcc_after_attack": 0.970766311513085
+          "white_box": {
+            "unconstrained": {
+              "no_defense": 0.8864026063100137,
+              "feature_squeezing": 0.8744855967078189,
+              "realizability_filter": 0.0,
+              "DR_after_attack": 0.11299675933822276,
+              "BalAcc_after_attack": 0.5540854314175708
+            },
+            "constrained": {
+              "no_defense": 0.04861111111111111,
+              "feature_squeezing": 0.04449588477366255,
+              "realizability_filter": 0.04861111111111111,
+              "DR_after_attack": 0.9463585195292512,
+              "BalAcc_after_attack": 0.970766311513085
+            }
           }
         },
         "BIM": {
-          "unconstrained": {
-            "no_defense": 0.9231824417009602,
-            "feature_squeezing": 0.6494341563786008,
-            "realizability_filter": 0.0,
-            "DR_after_attack": 0.07641139348456422,
-            "BalAcc_after_attack": 0.5357927484907415
+          "black_box": {
+            "unconstrained": {
+              "no_defense": 0.9158093278463649,
+              "feature_squeezing": 0.6852709190672154,
+              "realizability_filter": 0.0,
+              "DR_after_attack": 0.08374552276991301,
+              "BalAcc_after_attack": 0.539459813133416
+            },
+            "constrained": {
+              "no_defense": 0.04741083676268861,
+              "feature_squeezing": 0.02563443072702332,
+              "realizability_filter": 0.04741083676268861,
+              "DR_after_attack": 0.9475524475524476,
+              "BalAcc_after_attack": 0.9713632755246833
+            }
           },
-          "constrained": {
-            "no_defense": 0.052554869684499315,
-            "feature_squeezing": 0.027349108367626888,
-            "realizability_filter": 0.052554869684499315,
-            "DR_after_attack": 0.9424356131673205,
-            "BalAcc_after_attack": 0.9688048583321196
+          "white_box": {
+            "unconstrained": {
+              "no_defense": 0.9231824417009602,
+              "feature_squeezing": 0.6494341563786008,
+              "realizability_filter": 0.0,
+              "DR_after_attack": 0.07641139348456422,
+              "BalAcc_after_attack": 0.5357927484907415
+            },
+            "constrained": {
+              "no_defense": 0.052554869684499315,
+              "feature_squeezing": 0.027349108367626888,
+              "realizability_filter": 0.052554869684499315,
+              "DR_after_attack": 0.9424356131673205,
+              "BalAcc_after_attack": 0.9688048583321196
+            }
           }
         },
         "PGD": {
-          "unconstrained": {
-            "no_defense": 0.9226680384087792,
-            "feature_squeezing": 0.3143861454046639,
-            "realizability_filter": 0.0,
-            "DR_after_attack": 0.07692307692307693,
-            "BalAcc_after_attack": 0.5360485902099978
+          "black_box": {
+            "unconstrained": {
+              "no_defense": 0.9158093278463649,
+              "feature_squeezing": 0.3642832647462277,
+              "realizability_filter": 0.0,
+              "DR_after_attack": 0.08374552276991301,
+              "BalAcc_after_attack": 0.539459813133416
+            },
+            "constrained": {
+              "no_defense": 0.04895404663923182,
+              "feature_squeezing": 0.02854938271604938,
+              "realizability_filter": 0.04895404663923182,
+              "DR_after_attack": 0.9460173972369095,
+              "BalAcc_after_attack": 0.9705957503669141
+            }
           },
-          "constrained": {
-            "no_defense": 0.05435528120713306,
-            "feature_squeezing": 0.031035665294924554,
-            "realizability_filter": 0.05435528120713306,
-            "DR_after_attack": 0.9406447211325261,
-            "BalAcc_after_attack": 0.9679094123147225
+          "white_box": {
+            "unconstrained": {
+              "no_defense": 0.9226680384087792,
+              "feature_squeezing": 0.3143861454046639,
+              "realizability_filter": 0.0,
+              "DR_after_attack": 0.07692307692307693,
+              "BalAcc_after_attack": 0.5360485902099978
+            },
+            "constrained": {
+              "no_defense": 0.05435528120713306,
+              "feature_squeezing": 0.031035665294924554,
+              "realizability_filter": 0.05435528120713306,
+              "DR_after_attack": 0.9406447211325261,
+              "BalAcc_after_attack": 0.9679094123147225
+            }
           }
         }
       }
@@ -246,43 +376,47 @@
   "adversarial_training": {
     "LinearSVC": {
       "clean": {
-        "DR": 0.9503667064642675,
-        "FPR": 0.0437300467740738,
-        "Balanced Accuracy": 0.9533183298450969
+        "DR": 0.9504519870373529,
+        "FPR": 0.043061845719801026,
+        "Balanced Accuracy": 0.9536950706587759
       },
-      "evasion_under_constrained_pgd": 0.044059583632447955,
-      "baseline_evasion_under_constrained_pgd": 0.05263634716434137,
-      "n_adversarial_training_samples": 44201
+      "evasion_stale_surrogate": 0.00655002243158367,
+      "evasion_adaptive": 0.028532974427994618,
+      "baseline_evasion": 0.04973727124479072,
+      "n_adversarial_training_samples": 44217
     },
     "RandomForest": {
       "clean": {
-        "DR": 0.9986355108306327,
-        "FPR": 0.000445467369515183,
-        "Balanced Accuracy": 0.9990950217305588
+        "DR": 0.9987207914037183,
+        "FPR": 0.0005939564926869107,
+        "Balanced Accuracy": 0.9990634174555157
       },
-      "evasion_under_constrained_pgd": 0.0003415883859948762,
-      "baseline_evasion_under_constrained_pgd": 0.2995813039391609,
-      "n_adversarial_training_samples": 46704
+      "evasion_stale_surrogate": 0.0,
+      "evasion_adaptive": 0.0,
+      "baseline_evasion": 0.36469281380842516,
+      "n_adversarial_training_samples": 46648
     },
     "XGBoost": {
       "clean": {
-        "DR": 0.999232474842231,
-        "FPR": 0.0009651793006162299,
-        "Balanced Accuracy": 0.9991336477708074
+        "DR": 0.9991471942691454,
+        "FPR": 0.0007424456158586384,
+        "Balanced Accuracy": 0.9992023743266434
       },
-      "evasion_under_constrained_pgd": 0.0006827686267815994,
-      "baseline_evasion_under_constrained_pgd": 0.20378904249871993,
-      "n_adversarial_training_samples": 46704
+      "evasion_stale_surrogate": 0.0006828269033799932,
+      "evasion_adaptive": 0.001792420621372482,
+      "baseline_evasion": 0.3148148148148148,
+      "n_adversarial_training_samples": 46596
     },
     "MLP": {
       "clean": {
-        "DR": 0.9942862016032747,
-        "FPR": 0.004231940010394238,
-        "Balanced Accuracy": 0.9950271307964402
+        "DR": 0.9934333958724203,
+        "FPR": 0.006088054050040834,
+        "Balanced Accuracy": 0.9936726709111897
       },
-      "evasion_under_constrained_pgd": 0.027532378420104642,
-      "baseline_evasion_under_constrained_pgd": 0.05435528120713306,
-      "n_adversarial_training_samples": 46704
+      "evasion_stale_surrogate": 0.0012018198987037514,
+      "evasion_adaptive": 0.004721435316336166,
+      "baseline_evasion": 0.04895404663923182,
+      "n_adversarial_training_samples": 46660
     }
   }
 }
