@@ -35,17 +35,21 @@ for col in cat_cols:
     X[col] = le.fit_transform(X[col])
 
 # =========================
-# SCALE
-# =========================
-scaler = StandardScaler()
-X = scaler.fit_transform(X)
-
-# =========================
 # TRAIN TEST SPLIT
 # =========================
+# Split BEFORE scaling. Fitting the scaler on the full dataset lets the test
+# set's mean and variance leak into the training transform, which inflates the
+# reported accuracy.
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42, stratify=y
 )
+
+# =========================
+# SCALE (fit on train only)
+# =========================
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
 
 # =========================
 # TRAIN MODEL

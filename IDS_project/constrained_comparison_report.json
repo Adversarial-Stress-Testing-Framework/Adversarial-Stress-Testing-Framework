@@ -1,0 +1,107 @@
+{
+  "timestamp": "2026-08-04T14:28:47",
+  "epsilon": 0.3,
+  "pgd_steps": 40,
+  "n_features": 40,
+  "feature_roles": {
+    "immutable": 15,
+    "increase_only": 10,
+    "derived_rate": 15
+  },
+  "sections": {
+    "baseline_clean": {
+      "DR (Attack Recall)": 0.9413269657172096,
+      "Normal Recall": 0.9671096592174623,
+      "FPR": 0.03289034078253768,
+      "Accuracy": 0.9551101409009725,
+      "Balanced Accuracy": 0.954218312467336
+    },
+    "fgsm_unconstrained": {
+      "DR (Attack Recall)": 0.016970834044004776,
+      "Normal Recall": 0.9671096592174623,
+      "FPR": 0.03289034078253768,
+      "Accuracy": 0.5249057352649336,
+      "Balanced Accuracy": 0.49204024663073354,
+      "Evasion Rate": 0.9819713716252945,
+      "MPD": 1.8973665961010273,
+      "Robustness Score": 0.4302044056360389,
+      "realizability_violations": {
+        "features_with_negative_values": 11,
+        "integer_features_with_fractional_values": 23,
+        "rate_features_outside_0_1": 15,
+        "violated_rate_sum_constraints": 2
+      }
+    },
+    "fgsm_constrained": {
+      "DR (Attack Recall)": 0.8917789527545625,
+      "Normal Recall": 0.9671096592174623,
+      "FPR": 0.03289034078253768,
+      "Accuracy": 0.9320500099226037,
+      "Balanced Accuracy": 0.9294443059860125,
+      "Evasion Rate": 0.05263634716434137,
+      "MPD": 0.9132837373260255,
+      "Robustness Score": 0.023060130978368787,
+      "realizability_violations": {
+        "features_with_negative_values": 0,
+        "integer_features_with_fractional_values": 0,
+        "rate_features_outside_0_1": 1,
+        "violated_rate_sum_constraints": 0
+      }
+    },
+    "pgd_constrained": {
+      "DR (Attack Recall)": 0.8917789527545625,
+      "Normal Recall": 0.9671096592174623,
+      "FPR": 0.03289034078253768,
+      "Accuracy": 0.9320500099226037,
+      "Balanced Accuracy": 0.9294443059860125,
+      "Evasion Rate": 0.05263634716434137,
+      "MPD": 0.7052994190199809,
+      "Robustness Score": 0.023060130978368787
+    }
+  },
+  "budget_sweep": [
+    {
+      "epsilon": 0.1,
+      "constrained_evasion_rate": 0.018300416742163435,
+      "unconstrained_evasion_rate": 0.3854865011777496,
+      "overstatement_factor": 21.064356435643564
+    },
+    {
+      "epsilon": 0.3,
+      "constrained_evasion_rate": 0.05263634716434137,
+      "unconstrained_evasion_rate": 0.9819713716252945,
+      "overstatement_factor": 18.655765920826163
+    },
+    {
+      "epsilon": 0.5,
+      "constrained_evasion_rate": 0.12139880413118319,
+      "unconstrained_evasion_rate": 0.9974633085703932,
+      "overstatement_factor": 8.216417910447761
+    },
+    {
+      "epsilon": 1.0,
+      "constrained_evasion_rate": 0.6994926617140786,
+      "unconstrained_evasion_rate": 0.999909403877514,
+      "overstatement_factor": 1.4294780468851185
+    },
+    {
+      "epsilon": 2.0,
+      "constrained_evasion_rate": 0.9783475267258561,
+      "unconstrained_evasion_rate": 0.999909403877514,
+      "overstatement_factor": 1.022039077692379
+    },
+    {
+      "epsilon": 5.0,
+      "constrained_evasion_rate": 0.9800688530530893,
+      "unconstrained_evasion_rate": 1.0,
+      "overstatement_factor": 1.0203364762432983
+    }
+  ],
+  "headline": {
+    "unconstrained_evasion_rate": 0.9819713716252945,
+    "constrained_evasion_rate": 0.05263634716434137,
+    "overstatement_factor": 18.655765920826163,
+    "constrained_evasion_ceiling": 0.9800688530530893,
+    "certifiably_unevadable_fraction": 0.01993114694691067
+  }
+}
