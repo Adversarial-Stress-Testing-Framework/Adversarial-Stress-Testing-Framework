@@ -232,38 +232,53 @@ class ConstraintProjector:
         return counts
 
 
-def realizability_violations(X_original, feature_names, projector):
+def realizability_violations(X_original, feature_names, projector, tol=1e-9):
     """Count how many domain rules a batch of unscaled flows breaks.
 
     Used to quantify the gap between what an unconstrained attack produces and
     what a packet capture could actually contain.
+
+    `tol` absorbs floating-point noise rather than real violations. Projecting a
+    rate to exactly 1.0 and round-tripping it through StandardScaler returns
+    1.0000000000000002 - one unit in the last place of a float64. A strict
+    comparison counts that as an out-of-range rate and reports a violation the
+    constrained attack did not actually commit.
     """
     X = np.asarray(X_original, dtype=float)
     idx = {n: i for i, n in enumerate(feature_names)}
     report = {}
 
+    # Counters are scale-aware: an absolute tolerance is meaningless against
+    # src_bytes, which reaches 1.4e9 and carries proportionally larger
+    # round-trip error than a rate bounded to [0, 1].
+    def slack(col):
+        return tol * np.maximum(1.0, np.abs(col))
+
     negatives = 0
     for name, i in idx.items():
-        if name in INTEGER_FEATURES and (X[:, i] < 0).any():
+        if name in INTEGER_FEATURES and (X[:, i] < -slack(X[:, i])).any():
             negatives += 1
     report["features_with_negative_values"] = negatives
 
     fractional = 0
     for name, i in idx.items():
-        if name in INTEGER_FEATURES and not np.allclose(X[:, i], np.rint(X[:, i])):
-            fractional += 1
+        if name in INTEGER_FEATURES:
+            col = X[:, i]
+            if (np.abs(col - np.rint(col)) > slack(col)).any():
+                fractional += 1
     report["integer_features_with_fractional_values"] = fractional
 
     out_of_range_rates = 0
     for name, i in idx.items():
         if projector.roles.get(name) == DERIVED_RATE:
-            if (X[:, i] < 0).any() or (X[:, i] > 1).any():
+            col = X[:, i]
+            if (col < -tol).any() or (col > 1 + tol).any():
                 out_of_range_rates += 1
     report["rate_features_outside_0_1"] = out_of_range_rates
 
     broken_pairs = 0
     for (i, j), cap in (projector.pair_caps_ or {}).items():
-        if (X[:, i] + X[:, j] > cap + 1e-9).any():
+        if (X[:, i] + X[:, j] > cap + tol).any():
             broken_pairs += 1
     report["violated_rate_sum_constraints"] = broken_pairs
 
