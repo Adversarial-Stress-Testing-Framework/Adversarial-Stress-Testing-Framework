@@ -1,0 +1,151 @@
+{
+  "timestamp": "2026-09-09T20:35:03",
+  "epsilon": 0.3,
+  "steps": 20,
+  "restarts": 2,
+  "seeds": [
+    42,
+    7,
+    1337,
+    2024,
+    99
+  ],
+  "per_run": [
+    {
+      "seed": 42,
+      "model": "RandomForest",
+      "clean_DR": 0.9980385468190346,
+      "substitute_agreement_all": 0.9946021035919825,
+      "substitute_agreement_attacked": 0.9946167649320687,
+      "constrained_evasion": 0.35802785610527216,
+      "movable_feature_importance": 0.6576791281325083,
+      "n_attackable": 11703
+    },
+    {
+      "seed": 42,
+      "model": "XGBoost",
+      "clean_DR": 0.9993177554153164,
+      "substitute_agreement_all": 0.994244889859099,
+      "substitute_agreement_attacked": 0.9930022188086705,
+      "constrained_evasion": 0.316862945895204,
+      "movable_feature_importance": 0.6244086623191833,
+      "n_attackable": 11718
+    },
+    {
+      "seed": 7,
+      "model": "RandomForest",
+      "clean_DR": 0.9977827050997783,
+      "substitute_agreement_all": 0.9954356023020441,
+      "substitute_agreement_attacked": 0.9958119658119658,
+      "constrained_evasion": 0.8071794871794872,
+      "movable_feature_importance": 0.7000540289019483,
+      "n_attackable": 11700
+    },
+    {
+      "seed": 7,
+      "model": "XGBoost",
+      "clean_DR": 0.9989766331229746,
+      "substitute_agreement_all": 0.9946021035919825,
+      "substitute_agreement_attacked": 0.9930851971999317,
+      "constrained_evasion": 0.24995731603209834,
+      "movable_feature_importance": 0.6018924713134766,
+      "n_attackable": 11714
+    },
+    {
+      "seed": 1337,
+      "model": "RandomForest",
+      "clean_DR": 0.9982091079652056,
+      "substitute_agreement_all": 0.9959118872792221,
+      "substitute_agreement_attacked": 0.9948739854762921,
+      "constrained_evasion": 0.7788124733020076,
+      "movable_feature_importance": 0.6940885881947476,
+      "n_attackable": 11705
+    },
+    {
+      "seed": 1337,
+      "model": "XGBoost",
+      "clean_DR": 0.9986355108306327,
+      "substitute_agreement_all": 0.9967850764040485,
+      "substitute_agreement_attacked": 0.99666951323655,
+      "constrained_evasion": 0.40700256191289497,
+      "movable_feature_importance": 0.6299147009849548,
+      "n_attackable": 11710
+    },
+    {
+      "seed": 2024,
+      "model": "RandomForest",
+      "clean_DR": 0.9977827050997783,
+      "substitute_agreement_all": 0.9941258186148045,
+      "substitute_agreement_attacked": 0.994017094017094,
+      "constrained_evasion": 0.6799145299145299,
+      "movable_feature_importance": 0.6386436570701837,
+      "n_attackable": 11700
+    },
+    {
+      "seed": 2024,
+      "model": "XGBoost",
+      "clean_DR": 0.9989766331229746,
+      "substitute_agreement_all": 0.9935701528080968,
+      "substitute_agreement_attacked": 0.9914632064196688,
+      "constrained_evasion": 0.09023390814410108,
+      "movable_feature_importance": 0.6162825226783752,
+      "n_attackable": 11714
+    },
+    {
+      "seed": 99,
+      "model": "RandomForest",
+      "clean_DR": 0.99812382739212,
+      "substitute_agreement_all": 0.9958721968644573,
+      "substitute_agreement_attacked": 0.9945317840054683,
+      "constrained_evasion": 0.4524948735475051,
+      "movable_feature_importance": 0.6916275570932278,
+      "n_attackable": 11704
+    },
+    {
+      "seed": 99,
+      "model": "XGBoost",
+      "clean_DR": 0.9988913525498891,
+      "substitute_agreement_all": 0.9947211748362771,
+      "substitute_agreement_attacked": 0.9929138563988731,
+      "constrained_evasion": 0.14530863143515751,
+      "movable_feature_importance": 0.6767447590827942,
+      "n_attackable": 11713
+    }
+  ],
+  "analysis": {
+    "RandomForest": {
+      "evasion_range": [
+        0.35802785610527216,
+        0.8071794871794872
+      ],
+      "evasion_std": 0.20026455516586086,
+      "corr_evasion_vs_substitute_agreement": 0.4660637542126206,
+      "corr_evasion_vs_movable_importance": 0.34093548799442286,
+      "substitute_agreement_range": [
+        0.994017094017094,
+        0.9958119658119658
+      ],
+      "movable_importance_range": [
+        0.6386436570701837,
+        0.7000540289019483
+      ]
+    },
+    "XGBoost": {
+      "evasion_range": [
+        0.09023390814410108,
+        0.40700256191289497
+      ],
+      "evasion_std": 0.12774555943730406,
+      "corr_evasion_vs_substitute_agreement": 0.8591248723342678,
+      "corr_evasion_vs_movable_importance": -0.2142897402769074,
+      "substitute_agreement_range": [
+        0.9914632064196688,
+        0.99666951323655
+      ],
+      "movable_importance_range": [
+        0.6018924713134766,
+        0.6767447590827942
+      ]
+    }
+  }
+}
