@@ -1,0 +1,106 @@
+{
+  "timestamp": "2026-09-09T22:30:37",
+  "dataset": "cicids2017",
+  "spec": "cicids2017",
+  "epsilon": 0.3,
+  "steps": 20,
+  "restarts": 2,
+  "seeds": [
+    42,
+    7,
+    1337
+  ],
+  "n_features": 70,
+  "n_flows": 200000,
+  "undeclared_columns": [],
+  "per_seed": {
+    "42": {
+      "clean_DR": 0.8157226314452629,
+      "unconstrained_evasion": 0.9847423322434999,
+      "unconstrained_DR": 0.012446024892049785,
+      "unconstrained_violations": {
+        "features_with_negative_values": 0,
+        "integer_features_with_fractional_values": 0,
+        "rate_features_outside_0_1": 0,
+        "violated_rate_sum_constraints": 0,
+        "violated_ordering_constraints": 16
+      },
+      "constrained_evasion": 0.9406819243344232,
+      "constrained_DR": 0.04838709677419355,
+      "constrained_violations": {
+        "features_with_negative_values": 0,
+        "integer_features_with_fractional_values": 0,
+        "rate_features_outside_0_1": 0,
+        "violated_rate_sum_constraints": 0,
+        "violated_ordering_constraints": 0
+      },
+      "overstatement": 1.04683879510096
+    },
+    "7": {
+      "clean_DR": 0.7973075946151892,
+      "unconstrained_evasion": 0.9853456514813634,
+      "unconstrained_DR": 0.011684023368046735,
+      "unconstrained_violations": {
+        "features_with_negative_values": 0,
+        "integer_features_with_fractional_values": 0,
+        "rate_features_outside_0_1": 0,
+        "violated_rate_sum_constraints": 0,
+        "violated_ordering_constraints": 16
+      },
+      "constrained_evasion": 0.9361261548263778,
+      "constrained_DR": 0.05092710185420371,
+      "constrained_violations": {
+        "features_with_negative_values": 0,
+        "integer_features_with_fractional_values": 0,
+        "rate_features_outside_0_1": 0,
+        "violated_rate_sum_constraints": 0,
+        "violated_ordering_constraints": 0
+      },
+      "overstatement": 1.0525778458397141
+    },
+    "1337": {
+      "clean_DR": 0.802006604013208,
+      "unconstrained_evasion": 0.9838479809976247,
+      "unconstrained_DR": 0.012954025908051815,
+      "unconstrained_violations": {
+        "features_with_negative_values": 0,
+        "integer_features_with_fractional_values": 0,
+        "rate_features_outside_0_1": 0,
+        "violated_rate_sum_constraints": 0,
+        "violated_ordering_constraints": 16
+      },
+      "constrained_evasion": 0.9384006334125099,
+      "constrained_DR": 0.049403098806197615,
+      "constrained_violations": {
+        "features_with_negative_values": 0,
+        "integer_features_with_fractional_values": 0,
+        "rate_features_outside_0_1": 0,
+        "violated_rate_sum_constraints": 0,
+        "violated_ordering_constraints": 0
+      },
+      "overstatement": 1.0484306446169422
+    }
+  },
+  "aggregate": {
+    "clean_DR": {
+      "mean": 0.8050122766912201,
+      "std": 0.009568382650623562
+    },
+    "unconstrained_evasion": {
+      "mean": 0.9846453215741627,
+      "std": 0.0007535333582128196
+    },
+    "constrained_evasion": {
+      "mean": 0.9384029041911036,
+      "std": 0.002277885602908003
+    },
+    "constrained_DR": {
+      "mean": 0.04957243247819829,
+      "std": 0.0012784411879215576
+    },
+    "overstatement": {
+      "mean": 1.0492824285192055,
+      "std": 0.0029628242788958888
+    }
+  }
+}

@@ -312,9 +312,19 @@ def realizability_violations(X_original, feature_names, projector, tol=1e-9):
     def slack(col):
         return tol * np.maximum(1.0, np.abs(col))
 
+    # Non-negativity is a property of the feature, not of whether it happens to
+    # be integral. This previously only checked integer features, which was
+    # adequate for NSL-KDD - its counters are integers - but silently ignored 20
+    # CICIDS2017 columns that are equally incapable of going negative: flow
+    # durations, packet lengths, inter-arrival times. Whether a feature can be
+    # negative is learned from the training split like every other bound.
+    non_negative = (
+        projector.lower_ >= 0 if projector.lower_ is not None
+        else np.array([n in INTEGER_FEATURES for n in feature_names])
+    )
     negatives = 0
     for name, i in idx.items():
-        if name in INTEGER_FEATURES and (X[:, i] < -slack(X[:, i])).any():
+        if non_negative[i] and (X[:, i] < -slack(X[:, i])).any():
             negatives += 1
     report["features_with_negative_values"] = negatives
 

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-09T20:53:35",
+  "timestamp": "2026-09-09T22:34:36",
   "epsilon": 0.3,
   "pgd_steps": 40,
   "n_features": 40,
@@ -27,7 +27,7 @@
       "MPD": 1.8973665961010273,
       "Robustness Score": 0.4302044056360389,
       "realizability_violations": {
-        "features_with_negative_values": 11,
+        "features_with_negative_values": 23,
         "integer_features_with_fractional_values": 25,
         "rate_features_outside_0_1": 15,
         "violated_rate_sum_constraints": 2,
