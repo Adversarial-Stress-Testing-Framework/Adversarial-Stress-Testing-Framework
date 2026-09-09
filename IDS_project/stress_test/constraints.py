@@ -33,9 +33,32 @@ DERIVED_RATE   A ratio over a traffic window, bounded to [0, 1] and coupled to
 
 import numpy as np
 
-IMMUTABLE = "immutable"
-INCREASE_ONLY = "increase_only"
-DERIVED_RATE = "derived_rate"
+from stress_test.spec import (  # noqa: F401  (re-exported for callers)
+    FeatureSpec, SpecError, IMMUTABLE, INCREASE_ONLY, DERIVED_RATE,
+)
+
+_DEFAULT_SPEC = None
+
+
+def _default_spec():
+    """The NSL-KDD specification, loaded once.
+
+    The taxonomy below is retained as a literal fallback so the module still
+    imports if specs/ is missing, but specs/nsl_kdd.yaml is the source of truth
+    and is what other datasets are modelled on.
+    """
+    global _DEFAULT_SPEC
+    if _DEFAULT_SPEC is None:
+        try:
+            _DEFAULT_SPEC = FeatureSpec.load("nsl_kdd")
+        except SpecError:
+            _DEFAULT_SPEC = FeatureSpec(
+                name="nsl-kdd (builtin fallback)",
+                features={n: {"role": r, "integer": n in INTEGER_FEATURES}
+                          for n, r in FEATURE_ROLES.items()},
+                coupled_rates=RATE_SUM_PAIRS,
+            )
+    return _DEFAULT_SPEC
 
 
 FEATURE_ROLES = {
@@ -133,21 +156,34 @@ class ConstraintProjector:
     which keeps the class usable on datasets other than NSL-KDD.
     """
 
-    def __init__(self, feature_names, scaler, roles=None):
+    def __init__(self, feature_names, scaler, roles=None, spec=None):
+        """`spec` is a FeatureSpec describing this dataset's schema.
+
+        Omitting it falls back to the built-in NSL-KDD specification, so the
+        existing runners keep working unchanged. `roles`, a plain dict, is the
+        older interface and still overrides the spec when supplied.
+        """
         self.feature_names = list(feature_names)
         self.scaler = scaler
-        self.roles = roles or FEATURE_ROLES
+
+        if spec is None and roles is None:
+            spec = _default_spec()
+        self.spec = spec
+        self.roles = roles or (spec.roles_map() if spec else FEATURE_ROLES)
+
+        integer_names = spec.integer_features() if spec else INTEGER_FEATURES
+        pairs = spec.coupled_rates if spec else RATE_SUM_PAIRS
 
         self._idx = {name: i for i, name in enumerate(self.feature_names)}
         self._immutable = self._mask_for(IMMUTABLE)
         self._increase_only = self._mask_for(INCREASE_ONLY)
         self._rate = self._mask_for(DERIVED_RATE)
         self._integer = np.array(
-            [n in INTEGER_FEATURES for n in self.feature_names], dtype=bool
+            [n in integer_names for n in self.feature_names], dtype=bool
         )
         self._rate_pairs = [
             (self._idx[a], self._idx[b])
-            for a, b in RATE_SUM_PAIRS
+            for a, b in pairs
             if a in self._idx and b in self._idx
         ]
         self.lower_ = None

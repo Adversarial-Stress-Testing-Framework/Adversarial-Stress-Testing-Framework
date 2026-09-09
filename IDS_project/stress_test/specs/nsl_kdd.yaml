@@ -1,0 +1,124 @@
+name: nsl-kdd
+description: NSL-KDD / KDD Cup 99 flow features, 41 columns.
+features:
+  duration:
+    role: increase_only
+    integer: true
+  protocol_type:
+    role: immutable
+    integer: true
+  service:
+    role: immutable
+    integer: true
+  flag:
+    role: immutable
+    integer: true
+  src_bytes:
+    role: increase_only
+    integer: true
+  dst_bytes:
+    role: immutable
+    integer: true
+  land:
+    role: immutable
+    integer: true
+  wrong_fragment:
+    role: increase_only
+    integer: true
+  urgent:
+    role: increase_only
+    integer: true
+  hot:
+    role: immutable
+    integer: true
+  num_failed_logins:
+    role: increase_only
+    integer: true
+  logged_in:
+    role: immutable
+    integer: true
+  num_compromised:
+    role: immutable
+    integer: true
+  root_shell:
+    role: immutable
+    integer: true
+  su_attempted:
+    role: immutable
+    integer: true
+  num_root:
+    role: immutable
+    integer: true
+  num_file_creations:
+    role: increase_only
+    integer: true
+  num_shells:
+    role: immutable
+    integer: true
+  num_access_files:
+    role: immutable
+    integer: true
+  num_outbound_cmds:
+    role: immutable
+    integer: true
+  is_host_login:
+    role: immutable
+    integer: true
+  is_guest_login:
+    role: immutable
+    integer: true
+  count:
+    role: increase_only
+    integer: true
+  srv_count:
+    role: increase_only
+    integer: true
+  serror_rate:
+    role: derived_rate
+  srv_serror_rate:
+    role: derived_rate
+  rerror_rate:
+    role: derived_rate
+  srv_rerror_rate:
+    role: derived_rate
+  same_srv_rate:
+    role: derived_rate
+  diff_srv_rate:
+    role: derived_rate
+  srv_diff_host_rate:
+    role: derived_rate
+  dst_host_count:
+    role: increase_only
+    integer: true
+  dst_host_srv_count:
+    role: increase_only
+    integer: true
+  dst_host_same_srv_rate:
+    role: derived_rate
+  dst_host_diff_srv_rate:
+    role: derived_rate
+  dst_host_same_src_port_rate:
+    role: derived_rate
+  dst_host_srv_diff_host_rate:
+    role: derived_rate
+  dst_host_serror_rate:
+    role: derived_rate
+  dst_host_srv_serror_rate:
+    role: derived_rate
+  dst_host_rerror_rate:
+    role: derived_rate
+  dst_host_srv_rerror_rate:
+    role: derived_rate
+coupled_rates:
+- - same_srv_rate
+  - diff_srv_rate
+- - dst_host_same_srv_rate
+  - dst_host_diff_srv_rate
+- - serror_rate
+  - rerror_rate
+- - srv_serror_rate
+  - srv_rerror_rate
+- - dst_host_serror_rate
+  - dst_host_rerror_rate
+- - dst_host_srv_serror_rate
+  - dst_host_srv_rerror_rate
