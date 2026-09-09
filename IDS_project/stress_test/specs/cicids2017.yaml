@@ -1,8 +1,9 @@
 name: cicids2017
-description: CICIDS2017 / CICFlowMeter flow features, 78 columns. DRAFT - generated from the published
-  schema and not yet validated against the released CSVs. Column names in those files carry leading spaces;
-  strip them before loading. Several columns (Bwd PSH Flags, the Bulk features) are constant zero in practice
-  and will be dropped by clean_data.
+description: 'CICIDS2017 / CICFlowMeter flow features, 78 columns. Validated against the released CSVs: all 78 columns
+  present, none undeclared. Column names in those files carry leading spaces; the loader strips them. Eight columns
+  (Bwd PSH/URG Flags, the six Bulk features) are constant zero and dropped by clean_data. The 14 computed formulas
+  were each checked against real flows and reproduce the published column; Packet Length Mean, Average Packet Size,
+  Down/Up Ratio and Fwd IAT Total were checked and rejected, so they remain derived.'
 features:
   Destination Port:
     role: immutable
@@ -26,7 +27,8 @@ features:
   Fwd Packet Length Min:
     role: derived
   Fwd Packet Length Mean:
-    role: derived
+    role: computed
+    formula: '{Total Length of Fwd Packets} / {Total Fwd Packets}'
   Fwd Packet Length Std:
     role: derived
   Bwd Packet Length Max:
@@ -34,13 +36,16 @@ features:
   Bwd Packet Length Min:
     role: immutable
   Bwd Packet Length Mean:
-    role: immutable
+    role: computed
+    formula: '{Total Length of Bwd Packets} / {Total Backward Packets}'
   Bwd Packet Length Std:
     role: immutable
   Flow Bytes/s:
-    role: derived
+    role: computed
+    formula: ({Total Length of Fwd Packets} + {Total Length of Bwd Packets}) / ({Flow Duration} / 1000000)
   Flow Packets/s:
-    role: derived
+    role: computed
+    formula: ({Total Fwd Packets} + {Total Backward Packets}) / ({Flow Duration} / 1000000)
   Flow IAT Mean:
     role: derived
   Flow IAT Std:
@@ -88,9 +93,11 @@ features:
     role: immutable
     integer: true
   Fwd Packets/s:
-    role: derived
+    role: computed
+    formula: '{Total Fwd Packets} / ({Flow Duration} / 1000000)'
   Bwd Packets/s:
-    role: immutable
+    role: computed
+    formula: '{Total Backward Packets} / ({Flow Duration} / 1000000)'
   Min Packet Length:
     role: derived
   Max Packet Length:
@@ -100,7 +107,8 @@ features:
   Packet Length Std:
     role: derived
   Packet Length Variance:
-    role: derived
+    role: computed
+    formula: '{Packet Length Std} ** 2'
   FIN Flag Count:
     role: immutable
     integer: true
@@ -130,12 +138,14 @@ features:
   Average Packet Size:
     role: derived
   Avg Fwd Segment Size:
-    role: derived
+    role: computed
+    formula: '{Fwd Packet Length Mean}'
   Avg Bwd Segment Size:
-    role: immutable
+    role: computed
+    formula: '{Bwd Packet Length Mean}'
   Fwd Header Length.1:
-    role: increase_only
-    integer: true
+    role: computed
+    formula: '{Fwd Header Length}'
   Fwd Avg Bytes/Bulk:
     role: derived
   Fwd Avg Packets/Bulk:
@@ -149,17 +159,17 @@ features:
   Bwd Avg Bulk Rate:
     role: immutable
   Subflow Fwd Packets:
-    role: increase_only
-    integer: true
+    role: computed
+    formula: '{Total Fwd Packets}'
   Subflow Fwd Bytes:
-    role: increase_only
-    integer: true
+    role: computed
+    formula: '{Total Length of Fwd Packets}'
   Subflow Bwd Packets:
-    role: derived
-    integer: true
+    role: computed
+    formula: '{Total Backward Packets}'
   Subflow Bwd Bytes:
-    role: derived
-    integer: true
+    role: computed
+    formula: '{Total Length of Bwd Packets}'
   Init_Win_bytes_forward:
     role: derived
     integer: true

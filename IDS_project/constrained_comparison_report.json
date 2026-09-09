@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-09T22:34:36",
+  "timestamp": "2026-09-09T22:45:52",
   "epsilon": 0.3,
   "pgd_steps": 40,
   "n_features": 40,
@@ -7,7 +7,8 @@
     "immutable": 15,
     "increase_only": 10,
     "derived_rate": 15,
-    "derived": 0
+    "derived": 0,
+    "computed": 0
   },
   "sections": {
     "baseline_clean": {

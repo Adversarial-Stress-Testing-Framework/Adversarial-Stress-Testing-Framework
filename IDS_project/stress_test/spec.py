@@ -24,6 +24,24 @@ Roles
                  per-second rate. Movable in either direction but bounded by
                  what real traffic exhibits, and often ordered against its
                  siblings
+  computed       determined by other features through a stated formula, and
+                 recalculated from them after every projection rather than
+                 merely bounded
+
+`computed` exists because bounding a derived feature is not enough. Packet
+Length Mean is total bytes over total packets. An attacker who pads a payload
+does not then get to choose the resulting mean - it follows. Declaring the
+relationship makes that automatic:
+
+    Fwd Packet Length Mean:
+      role: computed
+      formula: "{Total Length of Fwd Packets} / {Total Fwd Packets}"
+
+Only formulas verified against real data belong here. Of eighteen candidates
+checked against CICIDS2017, fourteen reproduce the published column on every
+flow and four do not - CICFlowMeter computes Packet Length Mean, Average Packet
+Size, Down/Up Ratio and Fwd IAT Total differently from what their names imply.
+Those four stay `derived` rather than carry a formula that is wrong.
 
 `derived` exists because NSL-KDD is unusually simple. Every one of its computed
 features happens to be a percentage, so [0, 1] sufficed. CICIDS2017 has packet
@@ -47,14 +65,61 @@ NSL-KDD flows reach 1.5. Anything a spec asserts about magnitudes is a guess,
 so specs assert only structure and the data supplies the numbers.
 """
 
+import ast
 import json
+import re
 from pathlib import Path
 
 IMMUTABLE = "immutable"
 INCREASE_ONLY = "increase_only"
 DERIVED_RATE = "derived_rate"
 DERIVED = "derived"
-ROLES = (IMMUTABLE, INCREASE_ONLY, DERIVED_RATE, DERIVED)
+COMPUTED = "computed"
+ROLES = (IMMUTABLE, INCREASE_ONLY, DERIVED_RATE, DERIVED, COMPUTED)
+
+# Expression nodes a formula may contain. Deliberately minimal: arithmetic over
+# feature references and literals, nothing else. Specifications are authored in
+# this project rather than supplied by users, but a formula that can only add,
+# subtract, multiply, divide and raise to a power cannot be made to do anything
+# surprising by a typo either.
+_ALLOWED_NODES = (
+    ast.Expression, ast.BinOp, ast.UnaryOp, ast.Constant, ast.Name, ast.Load,
+    ast.Add, ast.Sub, ast.Mult, ast.Div, ast.Pow, ast.USub, ast.UAdd,
+)
+_REF = re.compile(r"\{([^{}]+)\}")
+
+
+def compile_formula(formula, feature_index):
+    """Turn '{a} / {b}' into a callable over a column matrix.
+
+    Returns (fn, [indices it reads]). fn takes the full (n_samples, n_features)
+    array and returns one column.
+    """
+    refs = _REF.findall(formula)
+    missing = [r for r in refs if r not in feature_index]
+    if missing:
+        raise SpecError(f"formula {formula!r} references unknown feature(s) {missing}")
+
+    slots = {}
+    expr = formula
+    for r in refs:
+        var = slots.setdefault(r, f"_v{len(slots)}")
+        expr = expr.replace("{" + r + "}", var)
+
+    tree = ast.parse(expr, mode="eval")
+    for node in ast.walk(tree):
+        if not isinstance(node, _ALLOWED_NODES):
+            raise SpecError(
+                f"formula {formula!r} contains a disallowed expression "
+                f"({type(node).__name__}); only arithmetic is permitted"
+            )
+    code = compile(tree, "<formula>", "eval")
+    order = [(var, feature_index[name]) for name, var in slots.items()]
+
+    def fn(X):
+        return eval(code, {"__builtins__": {}}, {v: X[:, i] for v, i in order})
+
+    return fn, [i for _, i in order]
 
 SPEC_DIR = Path(__file__).parent / "specs"
 
@@ -84,6 +149,14 @@ class FeatureSpec:
             for f in (a, b):
                 if f not in self.features:
                     raise SpecError(f"coupled_rates references unknown feature {f!r}")
+        for feat, entry in self.features.items():
+            if entry.get("role") == COMPUTED and not entry.get("formula"):
+                raise SpecError(f"computed feature {feat!r} has no formula")
+            if entry.get("formula"):
+                for ref in _REF.findall(entry["formula"]):
+                    if ref not in self.features:
+                        raise SpecError(
+                            f"formula for {feat!r} references unknown feature {ref!r}")
         for chain in self.ordering:
             if len(chain) < 2:
                 raise SpecError(f"ordering chain {chain!r} needs at least two features")
@@ -131,6 +204,12 @@ class FeatureSpec:
     def is_integer(self, feature):
         return bool(self.features.get(feature, {}).get("integer", False))
 
+    def formula_of(self, feature):
+        return self.features.get(feature, {}).get("formula")
+
+    def computed_features(self):
+        return {f for f in self.features if self.role_of(f) == COMPUTED}
+
     def integer_features(self):
         return {f for f in self.features if self.is_integer(f)}
 
@@ -172,6 +251,8 @@ class FeatureSpec:
             parts.append(f"{c[DERIVED_RATE]} rate")
         if c[DERIVED]:
             parts.append(f"{c[DERIVED]} derived")
+        if c[COMPUTED]:
+            parts.append(f"{c[COMPUTED]} computed")
         chains = f", {len(self.ordering)} ordering chains" if self.ordering else ""
         return (f"<FeatureSpec {self.name!r}: {len(self.features)} features, "
                 f"{' / '.join(parts)}{chains}>")

@@ -35,6 +35,7 @@ import numpy as np
 
 from stress_test.spec import (  # noqa: F401  (re-exported for callers)
     FeatureSpec, SpecError, IMMUTABLE, INCREASE_ONLY, DERIVED_RATE, DERIVED,
+    COMPUTED,
 )
 
 _DEFAULT_SPEC = None
@@ -197,9 +198,47 @@ class ConstraintProjector:
             for chain in chains
             if all(f in self._idx for f in chain)
         ]
+        self._computed = self._compile_computed(spec)
         self.lower_ = None
         self.upper_ = None
         self.pair_caps_ = None
+
+    def _compile_computed(self, spec):
+        """Compile computed features into evaluation order.
+
+        Order matters: Avg Fwd Segment Size is defined as Fwd Packet Length
+        Mean, which is itself computed, so it must be evaluated after it. A
+        topological sort over the reference graph gives that. A cycle means the
+        specification is contradictory and is worth failing on rather than
+        resolving arbitrarily.
+        """
+        if spec is None:
+            return []
+
+        from stress_test.spec import compile_formula
+
+        pending = {}
+        for name in self.feature_names:
+            if spec.role_of(name) == DERIVED and spec.formula_of(name):
+                pass  # a formula on a non-computed role is advisory only
+            if spec.role_of(name) != COMPUTED:
+                continue
+            formula = spec.formula_of(name)
+            fn, reads = compile_formula(formula, self._idx)
+            pending[self._idx[name]] = (fn, reads, name)
+
+        ordered, emitted = [], set()
+        while pending:
+            ready = [i for i, (_, reads, _) in pending.items()
+                     if not (set(reads) & set(pending) - {i} - emitted)]
+            if not ready:
+                cycle = [n for _, _, n in pending.values()]
+                raise SpecError(f"computed features form a dependency cycle: {cycle}")
+            for i in sorted(ready):
+                fn, reads, name = pending.pop(i)
+                ordered.append((i, fn, name))
+                emitted.add(i)
+        return ordered
 
     def _mask_for(self, role):
         # A feature with no declared role is treated as immutable: the
@@ -276,15 +315,55 @@ class ConstraintProjector:
             for a, b in zip(chain, chain[1:]):
                 adv[:, b] = np.maximum(adv[:, b], adv[:, a])
 
-        # Re-clip: rounding in step 4, and the running maximum in step 6, can
-        # push a value past a bound.
+        # 7. Computed features are recalculated from whatever the projection
+        #    left their constituents at. This is the step that makes derived
+        #    quantities follow the attack rather than be chosen by it: pad a
+        #    payload and the resulting mean packet length is determined, not
+        #    free. Bounding such a feature is not a constraint at all when its
+        #    observed range spans millions.
+        for i, fn, _name in self._computed:
+            with np.errstate(divide="ignore", invalid="ignore"):
+                val = fn(adv)
+            # A zero denominator means the flow has no packets or no duration.
+            # CICFlowMeter emits infinity there and the loader drops those rows;
+            # mid-attack the honest fallback is the value the sample started
+            # with, which is by construction realizable.
+            bad = ~np.isfinite(val)
+            if bad.any():
+                val = np.where(bad, clean[:, i], val)
+            adv[:, i] = val
+
+        # 8. Re-establish ordering around the recomputed values. Step 6 ordered
+        #    the chains, but step 7 then moved the computed members, which can
+        #    place a recomputed mean outside the min and max that had just been
+        #    made consistent with it.
+        #
+        #    A computed feature is determined, so it is the anchor: the free
+        #    members move to accommodate it, not the other way round. Pushing
+        #    the mean back between them instead would silently break the very
+        #    relationship step 7 exists to enforce.
+        if self._computed and self._ordering:
+            anchored = {i for i, _, _ in self._computed}
+            for chain in self._ordering:
+                for pos, idx_b in enumerate(chain):
+                    if idx_b not in anchored:
+                        continue
+                    for idx_a in chain[:pos]:          # predecessors must not exceed it
+                        if idx_a not in anchored:
+                            adv[:, idx_a] = np.minimum(adv[:, idx_a], adv[:, idx_b])
+                    for idx_c in chain[pos + 1:]:      # successors must not fall below it
+                        if idx_c not in anchored:
+                            adv[:, idx_c] = np.maximum(adv[:, idx_c], adv[:, idx_b])
+
+        # Re-clip: rounding in step 4, the running maximum in step 6, and
+        # recomputation in step 7 can all push a value past a bound.
         adv = np.clip(adv, self.lower_, self.upper_)
 
         return self.scaler.transform(adv)
 
     def summary(self):
         """Feature counts per role, for reporting."""
-        counts = {IMMUTABLE: 0, INCREASE_ONLY: 0, DERIVED_RATE: 0, DERIVED: 0}
+        counts = {IMMUTABLE: 0, INCREASE_ONLY: 0, DERIVED_RATE: 0, DERIVED: 0, COMPUTED: 0}
         for name in self.feature_names:
             counts[self.roles.get(name, IMMUTABLE)] += 1
         return counts
