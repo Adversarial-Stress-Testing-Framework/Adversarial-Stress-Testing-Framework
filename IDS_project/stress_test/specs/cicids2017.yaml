@@ -1,0 +1,215 @@
+name: cicids2017
+description: CICIDS2017 / CICFlowMeter flow features, 78 columns. DRAFT - generated from the published
+  schema and not yet validated against the released CSVs. Column names in those files carry leading spaces;
+  strip them before loading. Several columns (Bwd PSH Flags, the Bulk features) are constant zero in practice
+  and will be dropped by clean_data.
+features:
+  Destination Port:
+    role: immutable
+    integer: true
+  Flow Duration:
+    role: increase_only
+  Total Fwd Packets:
+    role: increase_only
+    integer: true
+  Total Backward Packets:
+    role: derived
+    integer: true
+  Total Length of Fwd Packets:
+    role: increase_only
+    integer: true
+  Total Length of Bwd Packets:
+    role: derived
+    integer: true
+  Fwd Packet Length Max:
+    role: increase_only
+  Fwd Packet Length Min:
+    role: derived
+  Fwd Packet Length Mean:
+    role: derived
+  Fwd Packet Length Std:
+    role: derived
+  Bwd Packet Length Max:
+    role: immutable
+  Bwd Packet Length Min:
+    role: immutable
+  Bwd Packet Length Mean:
+    role: immutable
+  Bwd Packet Length Std:
+    role: immutable
+  Flow Bytes/s:
+    role: derived
+  Flow Packets/s:
+    role: derived
+  Flow IAT Mean:
+    role: derived
+  Flow IAT Std:
+    role: derived
+  Flow IAT Max:
+    role: derived
+  Flow IAT Min:
+    role: derived
+  Fwd IAT Total:
+    role: increase_only
+  Fwd IAT Mean:
+    role: derived
+  Fwd IAT Std:
+    role: derived
+  Fwd IAT Max:
+    role: increase_only
+  Fwd IAT Min:
+    role: derived
+  Bwd IAT Total:
+    role: immutable
+  Bwd IAT Mean:
+    role: immutable
+  Bwd IAT Std:
+    role: immutable
+  Bwd IAT Max:
+    role: immutable
+  Bwd IAT Min:
+    role: immutable
+  Fwd PSH Flags:
+    role: increase_only
+    integer: true
+  Bwd PSH Flags:
+    role: immutable
+    integer: true
+  Fwd URG Flags:
+    role: increase_only
+    integer: true
+  Bwd URG Flags:
+    role: immutable
+    integer: true
+  Fwd Header Length:
+    role: increase_only
+    integer: true
+  Bwd Header Length:
+    role: immutable
+    integer: true
+  Fwd Packets/s:
+    role: derived
+  Bwd Packets/s:
+    role: immutable
+  Min Packet Length:
+    role: derived
+  Max Packet Length:
+    role: derived
+  Packet Length Mean:
+    role: derived
+  Packet Length Std:
+    role: derived
+  Packet Length Variance:
+    role: derived
+  FIN Flag Count:
+    role: immutable
+    integer: true
+  SYN Flag Count:
+    role: increase_only
+    integer: true
+  RST Flag Count:
+    role: immutable
+    integer: true
+  PSH Flag Count:
+    role: increase_only
+    integer: true
+  ACK Flag Count:
+    role: immutable
+    integer: true
+  URG Flag Count:
+    role: increase_only
+    integer: true
+  CWE Flag Count:
+    role: immutable
+    integer: true
+  ECE Flag Count:
+    role: immutable
+    integer: true
+  Down/Up Ratio:
+    role: derived
+  Average Packet Size:
+    role: derived
+  Avg Fwd Segment Size:
+    role: derived
+  Avg Bwd Segment Size:
+    role: immutable
+  Fwd Header Length.1:
+    role: increase_only
+    integer: true
+  Fwd Avg Bytes/Bulk:
+    role: derived
+  Fwd Avg Packets/Bulk:
+    role: derived
+  Fwd Avg Bulk Rate:
+    role: derived
+  Bwd Avg Bytes/Bulk:
+    role: immutable
+  Bwd Avg Packets/Bulk:
+    role: immutable
+  Bwd Avg Bulk Rate:
+    role: immutable
+  Subflow Fwd Packets:
+    role: increase_only
+    integer: true
+  Subflow Fwd Bytes:
+    role: increase_only
+    integer: true
+  Subflow Bwd Packets:
+    role: derived
+    integer: true
+  Subflow Bwd Bytes:
+    role: derived
+    integer: true
+  Init_Win_bytes_forward:
+    role: derived
+    integer: true
+  Init_Win_bytes_backward:
+    role: immutable
+    integer: true
+  act_data_pkt_fwd:
+    role: increase_only
+    integer: true
+  min_seg_size_forward:
+    role: immutable
+    integer: true
+  Active Mean:
+    role: derived
+  Active Std:
+    role: derived
+  Active Max:
+    role: derived
+  Active Min:
+    role: derived
+  Idle Mean:
+    role: derived
+  Idle Std:
+    role: derived
+  Idle Max:
+    role: increase_only
+  Idle Min:
+    role: derived
+ordering:
+- - Fwd Packet Length Min
+  - Fwd Packet Length Mean
+  - Fwd Packet Length Max
+- - Bwd Packet Length Min
+  - Bwd Packet Length Mean
+  - Bwd Packet Length Max
+- - Min Packet Length
+  - Packet Length Mean
+  - Max Packet Length
+- - Flow IAT Min
+  - Flow IAT Mean
+  - Flow IAT Max
+- - Fwd IAT Min
+  - Fwd IAT Mean
+  - Fwd IAT Max
+- - Bwd IAT Min
+  - Bwd IAT Mean
+  - Bwd IAT Max
+- - Active Min
+  - Active Mean
+  - Active Max
+- - Idle Min
+  - Idle Mean
+  - Idle Max

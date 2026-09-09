@@ -8,3 +8,11 @@ env/
 Thumbs.db
 .idea/
 .vscode/
+
+# Datasets are downloaded, not tracked - but keep the download instructions.
+# Excluding data/ outright would take the READMEs with it, and git cannot
+# re-include a file whose parent directory is excluded.
+data/*
+!data/cicids2017
+data/cicids2017/*
+!data/cicids2017/README.md

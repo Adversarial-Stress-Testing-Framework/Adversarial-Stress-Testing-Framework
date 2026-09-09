@@ -34,7 +34,7 @@ DERIVED_RATE   A ratio over a traffic window, bounded to [0, 1] and coupled to
 import numpy as np
 
 from stress_test.spec import (  # noqa: F401  (re-exported for callers)
-    FeatureSpec, SpecError, IMMUTABLE, INCREASE_ONLY, DERIVED_RATE,
+    FeatureSpec, SpecError, IMMUTABLE, INCREASE_ONLY, DERIVED_RATE, DERIVED,
 )
 
 _DEFAULT_SPEC = None
@@ -186,6 +186,17 @@ class ConstraintProjector:
             for a, b in pairs
             if a in self._idx and b in self._idx
         ]
+        # Ordering chains: each element must stay <= the next. NSL-KDD needs
+        # none; CICIDS2017 has many (min <= mean <= max on packet lengths and
+        # inter-arrival times). Chains are kept only where every member is
+        # present in this schema, so a partially-matching spec degrades to
+        # enforcing nothing rather than indexing off the end.
+        chains = spec.ordering if spec else []
+        self._ordering = [
+            [self._idx[f] for f in chain]
+            for chain in chains
+            if all(f in self._idx for f in chain)
+        ]
         self.lower_ = None
         self.upper_ = None
         self.pair_caps_ = None
@@ -255,14 +266,25 @@ class ConstraintProjector:
                 adv[over, i] *= scale
                 adv[over, j] *= scale
 
-        # Re-clip: rounding in step 4 can push a value one unit past a bound.
+        # 6. Ordered siblings must stay ordered. A running maximum along the
+        #    chain is the cheapest projection that guarantees it: each element
+        #    is pushed up to at least its predecessor, so min <= mean <= max
+        #    holds afterwards regardless of where the attack left them.
+        #    Raising rather than lowering keeps the perturbation in the
+        #    direction the attack chose wherever the constraint allows.
+        for chain in self._ordering:
+            for a, b in zip(chain, chain[1:]):
+                adv[:, b] = np.maximum(adv[:, b], adv[:, a])
+
+        # Re-clip: rounding in step 4, and the running maximum in step 6, can
+        # push a value past a bound.
         adv = np.clip(adv, self.lower_, self.upper_)
 
         return self.scaler.transform(adv)
 
     def summary(self):
         """Feature counts per role, for reporting."""
-        counts = {IMMUTABLE: 0, INCREASE_ONLY: 0, DERIVED_RATE: 0}
+        counts = {IMMUTABLE: 0, INCREASE_ONLY: 0, DERIVED_RATE: 0, DERIVED: 0}
         for name in self.feature_names:
             counts[self.roles.get(name, IMMUTABLE)] += 1
         return counts
@@ -317,5 +339,15 @@ def realizability_violations(X_original, feature_names, projector, tol=1e-9):
         if (X[:, i] + X[:, j] > cap + tol).any():
             broken_pairs += 1
     report["violated_rate_sum_constraints"] = broken_pairs
+
+    # Flows whose smallest packet exceeds their largest, and similar. NSL-KDD
+    # declares no ordering chains so this is always zero there; it is the
+    # violation class that dominates on richer schemas like CICIDS2017.
+    broken_order = 0
+    for chain in getattr(projector, "_ordering", []):
+        for a, b in zip(chain, chain[1:]):
+            if (X[:, a] > X[:, b] + tol * np.maximum(1.0, np.abs(X[:, b]))).any():
+                broken_order += 1
+    report["violated_ordering_constraints"] = broken_order
 
     return report

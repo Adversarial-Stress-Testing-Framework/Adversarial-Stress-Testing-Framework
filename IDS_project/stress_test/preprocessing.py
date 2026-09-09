@@ -52,3 +52,61 @@ def scale_features(X_train, X_test):
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
     return X_train_scaled, X_test_scaled, scaler
+
+
+# ---------------------------------------------------------------- CICIDS2017
+
+CICIDS_DIR = "../data/cicids2017"
+
+
+def load_cicids2017(path=CICIDS_DIR, files=None):
+    """Load the CICIDS2017 flow-feature CSVs into one frame.
+
+    The released files need three fixes before anything downstream works, and
+    all three are silent failures if missed:
+
+      - every column name is prefixed with a space (' Flow Duration')
+      - Flow Bytes/s and Flow Packets/s contain Infinity and NaN, produced by
+        flows whose duration rounds to zero
+      - the eight day-files must be concatenated, and their column order is not
+        identical across all of them
+
+    Pass `files` to load a subset; the default takes every CSV in the directory.
+    """
+    import glob
+    import os
+
+    paths = sorted(glob.glob(os.path.join(path, "*.csv"))) if files is None else list(files)
+    if not paths:
+        raise FileNotFoundError(
+            f"no CSVs under {path!r}. Download MachineLearningCSV.zip from "
+            "https://www.unb.ca/cic/datasets/ids-2017.html and extract it there."
+        )
+
+    frames = []
+    for p in paths:
+        d = pd.read_csv(p, low_memory=False)
+        d.columns = [c.strip() for c in d.columns]
+        frames.append(d)
+
+    df = pd.concat(frames, ignore_index=True, sort=False)
+
+    # Infinity is not a value a flow can take; it marks a division by a
+    # zero-length duration. Dropping those rows is honest - imputing them would
+    # invent traffic - and they are a small fraction of the total.
+    df = df.replace([float("inf"), float("-inf")], pd.NA).dropna()
+    return df
+
+
+def encode_and_split_cicids(df, label_col="Label", benign="BENIGN"):
+    """Split CICIDS2017 into features and a binary label.
+
+    Mirrors encode_and_split: 0 for benign, 1 for any attack class.
+    """
+    y = df[label_col].apply(lambda v: 0 if str(v).strip().upper() == benign else 1)
+    X = df.drop(columns=[label_col]).copy()
+
+    for col in X.select_dtypes(include=["object"]).columns:
+        X[col] = LabelEncoder().fit_transform(X[col].astype(str))
+
+    return X, y

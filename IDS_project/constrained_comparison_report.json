@@ -1,12 +1,13 @@
 {
-  "timestamp": "2026-09-09T20:07:27",
+  "timestamp": "2026-09-09T20:53:35",
   "epsilon": 0.3,
   "pgd_steps": 40,
   "n_features": 40,
   "feature_roles": {
     "immutable": 15,
     "increase_only": 10,
-    "derived_rate": 15
+    "derived_rate": 15,
+    "derived": 0
   },
   "sections": {
     "baseline_clean": {
@@ -29,7 +30,8 @@
         "features_with_negative_values": 11,
         "integer_features_with_fractional_values": 25,
         "rate_features_outside_0_1": 15,
-        "violated_rate_sum_constraints": 2
+        "violated_rate_sum_constraints": 2,
+        "violated_ordering_constraints": 0
       }
     },
     "fgsm_constrained": {
@@ -45,7 +47,8 @@
         "features_with_negative_values": 0,
         "integer_features_with_fractional_values": 0,
         "rate_features_outside_0_1": 0,
-        "violated_rate_sum_constraints": 0
+        "violated_rate_sum_constraints": 0,
+        "violated_ordering_constraints": 0
       }
     },
     "pgd_constrained": {

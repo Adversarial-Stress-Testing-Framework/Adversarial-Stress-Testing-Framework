@@ -20,6 +20,25 @@ Roles
                  opening extra connections
   derived_rate   a ratio over a traffic window, bounded to [0, 1] and coupled to
                  its siblings
+  derived        a statistic of other features - a mean, a standard deviation, a
+                 per-second rate. Movable in either direction but bounded by
+                 what real traffic exhibits, and often ordered against its
+                 siblings
+
+`derived` exists because NSL-KDD is unusually simple. Every one of its computed
+features happens to be a percentage, so [0, 1] sufficed. CICIDS2017 has packet
+length means reaching 1500, flow rates in the millions and inter-arrival
+standard deviations in microseconds - forcing those into [0, 1] would destroy
+them.
+
+Ordering constraints capture the other thing NSL-KDD did not need:
+
+    ordering:
+      - [Min Packet Length, Packet Length Mean, Max Packet Length]
+
+meaning each element must be <= the next. An unconstrained attack moving those
+three independently will happily emit a flow whose smallest packet is larger
+than its largest. Without this the projector has no way to notice.
 
 What is deliberately NOT in a spec: numeric bounds. Those are learned from the
 training split. An earlier version asserted that same_srv_rate + diff_srv_rate
@@ -34,7 +53,8 @@ from pathlib import Path
 IMMUTABLE = "immutable"
 INCREASE_ONLY = "increase_only"
 DERIVED_RATE = "derived_rate"
-ROLES = (IMMUTABLE, INCREASE_ONLY, DERIVED_RATE)
+DERIVED = "derived"
+ROLES = (IMMUTABLE, INCREASE_ONLY, DERIVED_RATE, DERIVED)
 
 SPEC_DIR = Path(__file__).parent / "specs"
 
@@ -46,11 +66,13 @@ class SpecError(ValueError):
 class FeatureSpec:
     """What an attacker can do to each feature of one dataset."""
 
-    def __init__(self, name, features, coupled_rates=None, description=""):
+    def __init__(self, name, features, coupled_rates=None, ordering=None,
+                 description=""):
         self.name = name
         self.description = description
         self.features = dict(features)
         self.coupled_rates = [tuple(p) for p in (coupled_rates or [])]
+        self.ordering = [list(c) for c in (ordering or [])]
 
         for feat, entry in self.features.items():
             role = entry.get("role")
@@ -62,6 +84,12 @@ class FeatureSpec:
             for f in (a, b):
                 if f not in self.features:
                     raise SpecError(f"coupled_rates references unknown feature {f!r}")
+        for chain in self.ordering:
+            if len(chain) < 2:
+                raise SpecError(f"ordering chain {chain!r} needs at least two features")
+            for f in chain:
+                if f not in self.features:
+                    raise SpecError(f"ordering references unknown feature {f!r}")
 
     # ---------------------------------------------------------------- loading
     @classmethod
@@ -89,6 +117,7 @@ class FeatureSpec:
             name=raw.get("name", p.stem),
             features=raw["features"],
             coupled_rates=raw.get("coupled_rates"),
+            ordering=raw.get("ordering"),
             description=raw.get("description", ""),
         )
 
@@ -135,9 +164,17 @@ class FeatureSpec:
 
     def __repr__(self):
         c = self.counts()
+        parts = [f"{c[IMMUTABLE]} immutable", f"{c[INCREASE_ONLY]} increase-only"]
+        # Only mention the derived kinds a schema actually uses: NSL-KDD has no
+        # plain derived features and CICIDS2017 has no rates, so printing both
+        # unconditionally reads as a zero where there is simply no such column.
+        if c[DERIVED_RATE]:
+            parts.append(f"{c[DERIVED_RATE]} rate")
+        if c[DERIVED]:
+            parts.append(f"{c[DERIVED]} derived")
+        chains = f", {len(self.ordering)} ordering chains" if self.ordering else ""
         return (f"<FeatureSpec {self.name!r}: {len(self.features)} features, "
-                f"{c[IMMUTABLE]} immutable / {c[INCREASE_ONLY]} increase-only / "
-                f"{c[DERIVED_RATE]} rate>")
+                f"{' / '.join(parts)}{chains}>")
 
 
 def available():
