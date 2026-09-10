@@ -10,7 +10,9 @@ No such traffic can be sent. This framework re-measures IDS robustness under
 could actually contain - and reports the difference.
 
 On NSL-KDD, reported vulnerability drops by **21.9x +/- 2.8** on differentiable
-models, measured over five random splits.
+models over five random splits. On CICIDS2017 the same measurement gives
+**1.05x** - the inflation is schema-dependent, and that difference is itself the
+result. See RESULTS_SUMMARY.md for the full picture.
 
 ---
 
@@ -92,6 +94,9 @@ IDS_project/stress_test/
   run_multiseed.py               headline metrics over five seeds
   run_tree_variance.py           diagnosis of the tree instability
   run_cicids_audit.py            the same audit on CICIDS2017
+  pcap_extract.py                pull attack flows out of a capture
+  flow_features.py               CICFlowMeter-shaped extractor + validation
+  run_packet_roundtrip.py        packets -> features -> classify
 IDS_project/dashboard.py         six-tab audit dashboard
 EXPERT_QNA_PREP.md               glossary, threat model, known limitations
 ```
@@ -133,6 +138,39 @@ hardcoded `same_srv_rate + diff_srv_rate <= 1` on the grounds that it must
 logically hold - 3,574 genuine NSL-KDD flows violate it, reaching 1.5, because
 the KDD extractor computes the two rates over different windows. That rule
 rejected 5.2% of legitimate traffic and tripled the false-positive rate.
+
+## Second dataset, and packet level
+
+The engine runs on CICIDS2017 from a specification file with no code changes.
+The outcome separates two claims NSL-KDD had conflated:
+
+| | NSL-KDD | CICIDS2017 |
+|---|---|---|
+| Unconstrained evasion | 97.0% | 98.5% |
+| Constrained evasion | 4.5% | 94.2% |
+| Overstatement | 21.9x | 1.05x |
+
+That unconstrained evaluation produces impossible traffic replicates - 59 of 70
+CICIDS features go negative and all 16 ordering constraints are violated, versus
+none under constraint. That constraining substantially reduces evasion does not.
+NSL-KDD's rate features are bounded to [0, 1] and box an attacker in; CICIDS2017
+leaves 25 derived and 13 increase-only features movable, which is room enough to
+evade regardless.
+
+Phase 3 closes the loop from packets to features and back, on 400 real
+FTP-Patator flows from the Tuesday capture:
+
+| Rung | Evasion |
+|---|---|
+| Unconstrained feature space | 100% |
+| Constrained feature space | 100% |
+| Realized in packets | 0% |
+
+Zero at every budget up to 1024 bytes of padding and 500 ms of delay, though
+that budget moves 30 of 78 features. Even constrained feature-space evaluation
+overstates what packet operations achieve. The extractor is a validated
+reimplementation rather than CICFlowMeter itself, so this is indicative rather
+than definitive - see RESULTS_SUMMARY.md.
 
 ## Adding a dataset
 
