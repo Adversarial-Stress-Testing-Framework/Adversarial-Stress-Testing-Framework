@@ -1,0 +1,103 @@
+{
+  "timestamp": "2026-09-10T08:57:23",
+  "n_flows_extracted": 400,
+  "n_flows_detected": 389,
+  "extractor_agreement": {
+    "Flow Duration": {
+      "mine_median": 9121448.516845703,
+      "published_median": 4044135.0,
+      "rel_diff": 0.5566345638490205,
+      "agrees": false
+    },
+    "Total Fwd Packets": {
+      "mine_median": 9.0,
+      "published_median": 6.0,
+      "rel_diff": 0.3333333333333333,
+      "agrees": false
+    },
+    "Total Backward Packets": {
+      "mine_median": 15.0,
+      "published_median": 6.0,
+      "rel_diff": 0.6,
+      "agrees": false
+    },
+    "Total Length of Fwd Packets": {
+      "mine_median": 105.0,
+      "published_median": 30.5,
+      "rel_diff": 0.7095238095238096,
+      "agrees": false
+    },
+    "Fwd Packet Length Max": {
+      "mine_median": 23.0,
+      "published_median": 16.0,
+      "rel_diff": 0.30434782608695654,
+      "agrees": false
+    },
+    "Fwd Packet Length Mean": {
+      "mine_median": 11.666666666666666,
+      "published_median": 9.6875,
+      "rel_diff": 0.1696428571428571,
+      "agrees": false
+    },
+    "Bwd Packet Length Max": {
+      "mine_median": 34.0,
+      "published_median": 34.0,
+      "rel_diff": 0.0,
+      "agrees": true
+    },
+    "Destination Port": {
+      "mine_median": 21.0,
+      "published_median": 21.0,
+      "rel_diff": 0.0,
+      "agrees": true
+    },
+    "Init_Win_bytes_forward": {
+      "mine_median": 29200.0,
+      "published_median": 29200.0,
+      "rel_diff": 0.0,
+      "agrees": true
+    }
+  },
+  "feature_space": {
+    "unconstrained": 1.0,
+    "constrained": 1.0
+  },
+  "realized": [
+    {
+      "budget": "none",
+      "pad_bytes": 0,
+      "delay_s": 0.0,
+      "evasion": 0.0
+    },
+    {
+      "budget": "pad 64B",
+      "pad_bytes": 64,
+      "delay_s": 0.0,
+      "evasion": 0.0
+    },
+    {
+      "budget": "pad 256B",
+      "pad_bytes": 256,
+      "delay_s": 0.0,
+      "evasion": 0.0
+    },
+    {
+      "budget": "delay 100ms",
+      "pad_bytes": 0,
+      "delay_s": 0.1,
+      "evasion": 0.0
+    },
+    {
+      "budget": "pad 256B + delay 100ms",
+      "pad_bytes": 256,
+      "delay_s": 0.1,
+      "evasion": 0.0
+    },
+    {
+      "budget": "pad 1024B + delay 500ms",
+      "pad_bytes": 1024,
+      "delay_s": 0.5,
+      "evasion": 0.0
+    }
+  ]
+}
