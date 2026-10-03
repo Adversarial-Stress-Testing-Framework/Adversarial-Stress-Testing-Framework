@@ -9,10 +9,13 @@ st.set_page_config(page_title="Intrusion Detection System", layout="wide")
 # =========================
 # LOAD MODEL + SCALER
 # =========================
+import os
+
 @st.cache_resource
 def load_model_and_scaler():
-    model = joblib.load("model.pkl")
-    scaler = joblib.load("scaler.pkl")
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    model = joblib.load(os.path.join(base_dir, "model.pkl"))
+    scaler = joblib.load(os.path.join(base_dir, "scaler.pkl"))
     return model, scaler
 
 
@@ -20,7 +23,8 @@ def load_model_and_scaler():
 # main.py doesn't persist the LabelEncoders. Deterministic given the same file.
 @st.cache_resource
 def fit_encoders():
-    df = pd.read_csv("KDDTrain+.txt", header=None)
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    df = pd.read_csv(os.path.join(base_dir, "KDDTrain+.txt"), header=None)
     X = df.iloc[:, :-2]
     cat_cols = X.select_dtypes(include=["object"]).columns
     encoders = {}
@@ -32,6 +36,14 @@ def fit_encoders():
 
 
 def preprocess(df_raw, encoders, feature_cols, cat_cols):
+    # Guard here rather than at each upload widget: both tabs funnel through
+    # this function, and without it the first 41 columns of any CSV get
+    # renamed to KDD names and the failure only surfaces inside
+    # scaler.transform as "could not convert string to float".
+    problem = rejection_reason(df_raw)
+    if problem:
+        raise ValueError(problem)
+
     X = df_raw.copy()
     X = X.iloc[:, : len(feature_cols)]
     X.columns = feature_cols
@@ -43,6 +55,42 @@ def preprocess(df_raw, encoders, feature_cols, cat_cols):
         X[col] = le.transform(X[col])
 
     return X
+
+
+# NSL-KDD's only text columns are protocol_type, service and flag. Anything
+# else non-numeric means the upload is not a KDD file, and preprocess() will
+# happily rename its first 41 columns anyway - so the failure surfaces much
+# later as "could not convert string to float: ' Destination Port'", which
+# names a symptom and not the cause. Check at the boundary instead.
+KDD_FEATURES = 41
+KDD_TEXT_COLS = {1, 2, 3}
+
+
+def rejection_reason(df_raw):
+    """Return a message explaining why this upload is unusable, else None."""
+    if df_raw.shape[1] < KDD_FEATURES:
+        return (f"This file has {df_raw.shape[1]} columns; the NSL-KDD model "
+                f"needs at least {KDD_FEATURES}.")
+
+    # Test whether the values parse as numbers rather than checking dtypes:
+    # pandas 3 reports text columns as StringDtype, not object, so a dtype
+    # comparison silently passes everything through.
+    first = df_raw.iloc[0, :KDD_FEATURES]
+    stray = [i for i in range(KDD_FEATURES)
+             if i not in KDD_TEXT_COLS
+             and pd.isna(pd.to_numeric(first.iloc[i], errors="coerce"))]
+    if not stray:
+        return None
+
+    sample = str(first.iloc[stray[0]]).strip()
+    if df_raw.shape[1] > 70:
+        return (f"This looks like a CICIDS2017 export — {df_raw.shape[1]} columns, "
+                f"and row 1 contains '{sample}'. This page runs the NSL-KDD model, "
+                "which takes 41 KDD features with no header row. The CICIDS2017 "
+                "results are in the audit dashboard: run `demo.bat`.")
+    return (f"Column {stray[0] + 1} contains text ('{sample}') where a number is "
+            "expected. If your file has a header row, remove it — this page "
+            "expects a headerless CSV of 41 KDD features.")
 
 
 def predict_batch(model, scaler, X):
